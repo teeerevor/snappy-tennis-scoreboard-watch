@@ -47,7 +47,7 @@ struct LargeScoreText: ViewModifier {
 struct MediumScoreText: ViewModifier {
     func body(content: Content) -> some View {
         content
-            .font(.system(size: fontSizeForMediumScore(), design: .monospaced))
+            .font(.system(size: fontSizeForMediumScore()))
             .fontWeight(.medium)
     }
 }
@@ -66,13 +66,13 @@ struct FlipText: View {
     let color: Color
     @State private var isFlipping = false
     @State private var previousText: String = ""
-    
+
     init(text: String, color: Color) {
         self.text = text
         self.color = color
         self._previousText = State(initialValue: text)
     }
-    
+
     var body: some View {
         ZStack {
             // Background text (previous value)
@@ -86,7 +86,7 @@ struct FlipText: View {
                     perspective: 0.3
                 )
                 .opacity(isFlipping ? 0 : 1)
-            
+
             // Foreground text (new value)
             Text(text)
                 .mediumScoreText()
@@ -106,7 +106,7 @@ struct FlipText: View {
                 withAnimation(.easeInOut(duration: 0.6)) {
                     isFlipping = true
                 }
-                
+
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                     previousText = newValue
                     isFlipping = false
@@ -120,7 +120,7 @@ extension View {
     func largeScoreText() -> some View {
         modifier(LargeScoreText())
     }
-    
+
     func mediumScoreText() -> some View {
         modifier(MediumScoreText())
     }
@@ -132,7 +132,7 @@ struct ContentView: View {
     @State private var player1Points = "00"
     @State private var player1SetScore = [0,0,0,0,0]
     @State private var currentSet = 0
-    
+
     // Settings
     @State private var showingSettings = false
     @State private var player1Name = "Ana"
@@ -141,12 +141,12 @@ struct ContentView: View {
     @State private var player2Color = Color.indigo
     @State private var setsToPlay = 3
     @State private var tieBreakRule = TieBreakRule.at66
-    
+
     // Celebration
     @State private var showingCelebration = false
     @State private var celebrationType: CelebrationType = .game
     @State private var scoreUpdateAnimation = false
-    
+
     // Match completion
     @State private var isMatchComplete = false
     @State private var matchWinner = ""
@@ -160,7 +160,7 @@ struct ContentView: View {
 
     // History tracking
     @State private var gameHistory: [(player2Points: String, player1Points: String, player2SetScore: [Int], player1SetScore: [Int], currentSet: Int)] = []
-    
+
     // Computed property for dynamic set display
     var setsToShow: Int {
         if setsToPlay == 5 {
@@ -181,7 +181,7 @@ struct ContentView: View {
         }
         return "00"
     }
-    
+
     func saveCurrentState() {
         let currentState = (
             player2Points: player2Points,
@@ -192,10 +192,10 @@ struct ContentView: View {
         )
         gameHistory.append(currentState)
     }
-    
+
     func undoLastChange() {
         guard !gameHistory.isEmpty else { return }
-        
+
         let previousState = gameHistory.removeLast()
         player2Points = previousState.player2Points
         player1Points = previousState.player1Points
@@ -203,11 +203,11 @@ struct ContentView: View {
         player1SetScore = previousState.player1SetScore
         currentSet = previousState.currentSet
     }
-    
+
     func hasWonTieBreak(_ personScore: Int, _ opponentScore: Int) -> Bool {
       return personScore >= 7 && personScore - opponentScore >= 2 ? true : false
     }
-    
+
     func hasWonGame(_ personScore: String) -> Bool {
       return personScore == "40" ? true : false
     }
@@ -216,7 +216,7 @@ struct ContentView: View {
         switch tieBreakRule {
         case .at66:
             // Win at 6 games if opponent has less than 6, or 7-6 after tie break
-            return (personSetScore >= 6 && opponentSetScore <= 4) || 
+            return (personSetScore >= 6 && opponentSetScore <= 4) ||
                    (personSetScore == 7 && opponentSetScore == 5) ||
                    (personSetScore == 7 && opponentSetScore == 6)
         case .at55:
@@ -229,7 +229,7 @@ struct ContentView: View {
             return personSetScore >= 6 && personSetScore - opponentSetScore >= 2
         }
     }
-    
+
     func hasWonMatch(_ playerSetScore: [Int], _ opponentSetScore: [Int]) -> Bool {
         var setsWon = 0
         for i in 0..<playerSetScore.count {
@@ -240,11 +240,11 @@ struct ContentView: View {
         let setsToWin = (setsToPlay + 1) / 2  // 1->1, 3->2, 5->3
         return setsWon >= setsToWin
     }
-    
+
     func getMatchWinner() -> String? {
         var player1Wins = 0
         var player2Wins = 0
-        
+
         for i in 0..<player1SetScore.count {
             if hasWonSet(player1SetScore[i], player2SetScore[i]) {
                 player1Wins += 1
@@ -252,9 +252,9 @@ struct ContentView: View {
                 player2Wins += 1
             }
         }
-        
+
         let setsToWin = (setsToPlay + 1) / 2  // 1->1, 3->2, 5->3
-        
+
         if player1Wins >= setsToWin {
             return player1Name
         } else if player2Wins >= setsToWin {
@@ -262,7 +262,7 @@ struct ContentView: View {
         }
         return nil
     }
-    
+
     func triggerCelebration(type: CelebrationType) {
         celebrationType = type
         showingCelebration = true
@@ -272,7 +272,7 @@ struct ContentView: View {
       player2Points = "00"
       player1Points = "00"
     }
-    
+
     func resetAllScores() {
         player2Points = "00"
         player1Points = "00"
@@ -283,7 +283,7 @@ struct ContentView: View {
         isMatchComplete = false
         matchWinner = ""
     }
-    
+
     func isTieBreak() -> Bool {
         switch tieBreakRule {
         case .at66:
@@ -294,24 +294,24 @@ struct ContentView: View {
             return false
         }
     }
-    
+
     func updateScore(_ player: String) {
         saveCurrentState()
-        
+
         let isPlayer1 = player == "player1"
         var playerPoints = isPlayer1 ? player1Points : player2Points
         var playerSetScore = isPlayer1 ? player1SetScore : player2SetScore
         var gameWon = false
         var setWon = false
         var matchWon = false
-        
+
         if isTieBreak() {
             var playerTieBreakPoints = Int(playerPoints) ?? 0
             let opponentPoints = isPlayer1 ? player2Points : player1Points
             let opponentTieBreakPoints = Int(opponentPoints) ?? 0
             playerTieBreakPoints += 1
             playerPoints = playerTieBreakPoints >= 10 ? "\(playerTieBreakPoints)" :"0\(playerTieBreakPoints)"
-            
+
             if hasWonTieBreak(playerTieBreakPoints, opponentTieBreakPoints) {
                 // Set the correct final score based on tie break rule
                 let opponentSetScore = isPlayer1 ? player2SetScore : player1SetScore
@@ -326,13 +326,13 @@ struct ContentView: View {
                     playerSetScore[currentSet] += 1
                 }
                 setWon = true
-                
+
                 if hasWonMatch(playerSetScore, opponentSetScore) {
                     matchWon = true
                 } else {
                     currentSet += 1
                 }
-                
+
                 playerPoints = "00"
                 resetGameScores()
             }
@@ -340,17 +340,17 @@ struct ContentView: View {
             if hasWonGame(playerPoints) {
                 playerSetScore[currentSet] += 1
                 gameWon = true
-                
+
                 let opponentSetScore = isPlayer1 ? player2SetScore : player1SetScore
                 if hasWonSet(playerSetScore[currentSet], opponentSetScore[currentSet]) {
                     setWon = true
-                    
+
                     if hasWonMatch(playerSetScore, opponentSetScore) {
                         matchWon = true
                     } else {
                         currentSet += 1
                     }
-                    
+
                     playerPoints = "00"
                     resetGameScores()
                 } else {
@@ -366,12 +366,12 @@ struct ContentView: View {
         // Store the calculated values for delayed update
         let finalPlayerPoints = playerPoints
         let finalPlayerSetScore = playerSetScore
-        
+
         // Trigger celebrations first, then update scores
         if matchWon {
             matchWinner = getMatchWinner() ?? ""
-            triggerCelebration(type: .match(setsToPlay: setsToPlay))
-            
+            triggerCelebration(type: .match)
+
             // Update score immediately when returning to scoreboard
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.7) {
                 if isPlayer1 {
@@ -384,7 +384,7 @@ struct ContentView: View {
             }
         } else if setWon {
             triggerCelebration(type: .set)
-            
+
             // Update score immediately when returning to scoreboard
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.7) {
                 if isPlayer1 {
@@ -397,7 +397,7 @@ struct ContentView: View {
             }
         } else if gameWon {
             triggerCelebration(type: .game)
-            
+
             // Update score immediately when returning to scoreboard
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.7) {
                 if isPlayer1 {
@@ -417,13 +417,13 @@ struct ContentView: View {
                 player2Points = finalPlayerPoints
                 player2SetScore = finalPlayerSetScore
             }
-            
+
             withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                 scoreUpdateAnimation.toggle()
             }
         }
     }
-    
+
     var body: some View {
         VStack(spacing: 8) {
             if isMatchComplete {
@@ -451,19 +451,17 @@ struct ContentView: View {
                     Text(player1Points)
                         .largeScoreText()
                         .foregroundColor(player1Color)
-                        .scaleEffect(scoreUpdateAnimation ? 1.1 : 1.0)
                         .onTapGesture {
                             updateScore("player1")
                         }
                     Text(player2Points)
                         .largeScoreText()
                         .foregroundColor(player2Color)
-                        .scaleEffect(scoreUpdateAnimation ? 1.1 : 1.0)
                         .onTapGesture {
                             updateScore("player2")
                         }
                 }
-                
+
                 VStack(spacing: 4) {
                     if setsToPlay == 1 {
                         // Horizontal layout for single set
@@ -504,7 +502,7 @@ struct ContentView: View {
                                 .padding(8)
                         }
                         .buttonStyle(TransparentButtonStyle())
-                        
+
                         Button(action: {
                             showingSettings = true
                         }) {
@@ -534,12 +532,12 @@ struct ContentView: View {
                 celebrationType: celebrationType,
                 onDismiss: {
                     showingCelebration = false
-                    
+
                     // Only show match complete view after match celebration is done
                     if case .match = celebrationType {
                         isMatchComplete = true
                     }
-                    
+
                     withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
                         scoreUpdateAnimation.toggle()
                     }

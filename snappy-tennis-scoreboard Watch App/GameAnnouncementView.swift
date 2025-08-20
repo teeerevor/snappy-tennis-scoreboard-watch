@@ -10,17 +10,29 @@ import SwiftUI
 enum CelebrationType {
     case game
     case set
-    case match(setsToPlay: Int)
+    case match
     
     var words: [String] {
         switch self {
         case .game:
-            return ["Game"]
+            return ["GAME"]
         case .set:
-            return ["Game", "Set"]
-        case .match(let setsToPlay):
-            return ["Game", "Set", "Match"]
+            return ["GAME", "SET"]
+        case .match:
+            return ["GAME", "SET", "MATCH"]
         }
+    }
+}
+
+func fontSizeAnnouncementText() -> CGFloat {
+    let width = WKInterfaceDevice.current().screenBounds.width
+    switch width {
+    case 198...: // Ultra 49mm
+        return 50
+    case 184...: // 45/44mm
+        return 50
+    default: // 42/40/38mm and others
+        return 40
     }
 }
 
@@ -47,7 +59,7 @@ struct GameAnnouncementView: View {
             
             if currentWordIndex < words.count {
                 Text(words[currentWordIndex])
-                    .font(.largeTitle)
+                    .font(.system(size:fontSizeAnnouncementText()))
                     .fontWeight(.heavy)
                     .foregroundColor(.white)
                     .opacity(wordOpacity)
@@ -100,7 +112,7 @@ struct GameAnnouncementView: View {
 
 #Preview {
     GameAnnouncementView(
-        celebrationType: .game,
+        celebrationType: .match,
         onDismiss: {}
     )
 }

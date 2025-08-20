@@ -58,7 +58,7 @@ struct GameResultView: View {
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
             
-            VStack(spacing: 8) {
+            VStack(spacing: 4) {
                 HStack(spacing: 20) {
                     ForEach(0..<setsToShow, id: \.self) { setIndex in
                         Text("\(player1SetScore[setIndex])")
@@ -107,7 +107,7 @@ struct GameResultView: View {
         player1Color: .mint,
         player2Color: .indigo,
         loserColor: .gray,
-        player1Name: "Samantha",
+        player1Name: "Bob",
         player2Name: "Bob",
         setsToShow: 3,
         totalSets: 3,

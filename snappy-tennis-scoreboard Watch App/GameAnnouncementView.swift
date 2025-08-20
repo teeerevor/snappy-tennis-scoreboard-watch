@@ -12,14 +12,14 @@ enum CelebrationType {
     case set
     case match
     
-    var words: [String] {
+    func words(language: Language) -> [String] {
         switch self {
         case .game:
-            return ["GAME"]
+            return [LocalizedStrings.getString("game", language: language)]
         case .set:
-            return ["GAME", "SET"]
+            return [LocalizedStrings.getString("game", language: language), LocalizedStrings.getString("set", language: language)]
         case .match:
-            return ["GAME", "SET", "MATCH"]
+            return [LocalizedStrings.getString("game", language: language), LocalizedStrings.getString("set", language: language), LocalizedStrings.getString("match", language: language)]
         }
     }
 }
@@ -38,6 +38,7 @@ func fontSizeAnnouncementText() -> CGFloat {
 
 struct GameAnnouncementView: View {
     let celebrationType: CelebrationType
+    let language: Language
     let onDismiss: () -> Void
     
     @State private var currentWordIndex = 0
@@ -46,10 +47,11 @@ struct GameAnnouncementView: View {
     
     private let words: [String]
     
-    init(celebrationType: CelebrationType, onDismiss: @escaping () -> Void) {
+    init(celebrationType: CelebrationType, language: Language, onDismiss: @escaping () -> Void) {
         self.celebrationType = celebrationType
+        self.language = language
         self.onDismiss = onDismiss
-        self.words = celebrationType.words
+        self.words = celebrationType.words(language: language)
     }
     
     var body: some View {
@@ -113,6 +115,7 @@ struct GameAnnouncementView: View {
 #Preview {
     GameAnnouncementView(
         celebrationType: .match,
+        language: .english,
         onDismiss: {}
     )
 }

@@ -21,6 +21,7 @@ struct GameResultView: View {
     let onSettings: () -> Void
     let onPlayOn: () -> Void
     let onReturn: () -> Void
+    let language: Language
     
     @State private var showingOptions = false
     
@@ -81,7 +82,7 @@ struct GameResultView: View {
     var body: some View {
         VStack(spacing: 16) {
             
-            Text("\(winnerName) wins!")
+            Text("\(winnerName) \(LocalizedStrings.getString("wins", language: language))")
                 .font(.title2)
                 .fontWeight(.bold)
                 .foregroundColor(.white)
@@ -135,7 +136,7 @@ struct GameResultView: View {
             }
             
             if !showingOptions {
-                Text("Tap for options")
+                Text(LocalizedStrings.getString("tapForOptions", language: language))
                     .font(.caption)
                     .foregroundColor(.white)
                     .opacity(0.6)
@@ -144,7 +145,7 @@ struct GameResultView: View {
                     VStack(spacing: 8) {
                         if canPlayOn {
                             Button(action: onPlayOn) {
-                                Text("Play On")
+                                Text(LocalizedStrings.getString("playOn", language: language))
                                     .font(.body)
                                     .fontWeight(.medium)
                                     .foregroundColor(.white)
@@ -157,7 +158,7 @@ struct GameResultView: View {
                         }
                         
                         Button(action: onReturn) {
-                            Text("New Game")
+                            Text(LocalizedStrings.getString("newGame", language: language))
                                 .font(.body)
                                 .fontWeight(.medium)
                                 .foregroundColor(.white)
@@ -213,6 +214,7 @@ struct GameResultView: View {
         onUndo: {},
         onSettings: {},
         onPlayOn: {},
-        onReturn: {}
+        onReturn: {},
+        language: .english
     )
 }

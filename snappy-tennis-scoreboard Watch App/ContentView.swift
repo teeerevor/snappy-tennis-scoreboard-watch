@@ -170,6 +170,7 @@ struct ContentView: View {
     @State private var player2Color = Color.green
     @State private var setsToPlay = 3
     @State private var tieBreakRule = TieBreakRule.at66
+    @State private var language = Language.english
 
     // Celebration
     @State private var showingCelebration = false
@@ -217,6 +218,13 @@ struct ContentView: View {
         } else {
             tieBreakRule = .at66
         }
+        
+        if let languageString = UserDefaults.standard.string(forKey: "language"),
+           let lang = Language(rawValue: languageString) {
+            language = lang
+        } else {
+            language = .english
+        }
     }
     
     func saveSettings() {
@@ -226,6 +234,7 @@ struct ContentView: View {
         UserDefaults.standard.set(player2Color.name ?? "green", forKey: "player2Color")
         UserDefaults.standard.set(setsToPlay, forKey: "setsToPlay")
         UserDefaults.standard.set(tieBreakRule.rawValue, forKey: "tieBreakRule")
+        UserDefaults.standard.set(language.rawValue, forKey: "language")
     }
 
     // Computed property for dynamic set display
@@ -525,7 +534,8 @@ struct ContentView: View {
                     onReturn: {
                         resetAllScores()
                         isMatchComplete = false
-                    }
+                    },
+                    language: language
                 )
             } else {
                 // Active match view
@@ -606,12 +616,14 @@ struct ContentView: View {
                 player2Color: $player2Color,
                 setsToPlay: $setsToPlay,
                 tieBreakRule: $tieBreakRule,
+                language: $language,
                 onReset: resetAllScores
             )
         }
         .fullScreenCover(isPresented: $showingCelebration) {
             GameAnnouncementView(
                 celebrationType: celebrationType,
+                language: language,
                 onDismiss: {
                     showingCelebration = false
 
@@ -636,6 +648,7 @@ struct ContentView: View {
         .onChange(of: player2Color) { _, _ in saveSettings() }
         .onChange(of: setsToPlay) { _, _ in saveSettings() }
         .onChange(of: tieBreakRule) { _, _ in saveSettings() }
+        .onChange(of: language) { _, _ in saveSettings() }
     }
 }
 

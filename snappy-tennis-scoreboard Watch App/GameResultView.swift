@@ -90,22 +90,46 @@ struct GameResultView: View {
                 .fixedSize(horizontal: false, vertical: true)
             
             VStack(spacing: 4) {
-                HStack(spacing: 20) {
-                    ForEach(0..<setsToShow, id: \.self) { setIndex in
-                        Text("\(player1SetScore[setIndex])")
+                if totalSets == 1 {
+                    // Horizontal layout for single set
+                    HStack(spacing: 8) {
+                        Text("\(player1SetScore[0])")
                             .font(.system(.title2, design: .monospaced))
                             .fontWeight(.medium)
                             .foregroundColor(player1DisplayColor)
                             .opacity(player1Opacity)
-                    }
-                }
-                HStack(spacing: 20) {
-                    ForEach(0..<setsToShow, id: \.self) { setIndex in
-                        Text("\(player2SetScore[setIndex])")
+                        Text("-")
+                            .font(.system(.title2, design: .monospaced))
+                            .fontWeight(.medium)
+                            .foregroundColor(.white)
+                            .opacity(0.6)
+                        Text("\(player2SetScore[0])")
                             .font(.system(.title2, design: .monospaced))
                             .fontWeight(.medium)
                             .foregroundColor(player2DisplayColor)
                             .opacity(player2Opacity)
+                    }
+                } else {
+                    // Vertical layout for multiple sets
+                    VStack {
+                        HStack(spacing: 20) {
+                            ForEach(0..<setsToShow, id: \.self) { setIndex in
+                                Text("\(player1SetScore[setIndex])")
+                                    .font(.system(.title2, design: .monospaced))
+                                    .fontWeight(.medium)
+                                    .foregroundColor(player1DisplayColor)
+                                    .opacity(player1Opacity)
+                            }
+                        }
+                        HStack(spacing: 20) {
+                            ForEach(0..<setsToShow, id: \.self) { setIndex in
+                                Text("\(player2SetScore[setIndex])")
+                                    .font(.system(.title2, design: .monospaced))
+                                    .fontWeight(.medium)
+                                    .foregroundColor(player2DisplayColor)
+                                    .opacity(player2Opacity)
+                            }
+                        }
                     }
                 }
             }
@@ -165,6 +189,8 @@ struct GameResultView: View {
                 }
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.clear)
         .onTapGesture {
             withAnimation(.easeInOut(duration: 0.3)) {
                 showingOptions.toggle()

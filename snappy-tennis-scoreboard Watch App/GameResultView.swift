@@ -19,6 +19,10 @@ struct GameResultView: View {
     let totalSets: Int
     let onUndo: () -> Void
     let onSettings: () -> Void
+    let onPlayOn: () -> Void
+    let onReturn: () -> Void
+    
+    @State private var showingOptions = false
     
     
     private var player1Won: Bool {
@@ -45,6 +49,33 @@ struct GameResultView: View {
     
     private var player2DisplayColor: Color {
         return player1Won ? loserColor : player2Color
+    }
+    
+    private var canPlayOn: Bool {
+        // Check if match is truly complete (winner has required number of sets)
+        let player1Wins = countSetsWon(player1SetScore, player2SetScore)
+        let player2Wins = countSetsWon(player2SetScore, player1SetScore)
+        let setsToWin = (totalSets + 1) / 2  // 1->1, 3->2, 5->3
+        
+        // If either player has won the required number of sets, can't play on
+        return player1Wins < setsToWin && player2Wins < setsToWin
+    }
+    
+    private func countSetsWon(_ playerSetScore: [Int], _ opponentSetScore: [Int]) -> Int {
+        var setsWon = 0
+        for i in 0..<playerSetScore.count {
+            if hasWonSet(playerSetScore[i], opponentSetScore[i]) {
+                setsWon += 1
+            }
+        }
+        return setsWon
+    }
+    
+    private func hasWonSet(_ personSetScore: Int, _ opponentSetScore: Int) -> Bool {
+        // Simplified set win logic (matches the one from ContentView)
+        return (personSetScore >= 6 && opponentSetScore <= 4) ||
+               (personSetScore == 7 && opponentSetScore == 5) ||
+               (personSetScore == 7 && opponentSetScore == 6)
     }
     
     var body: some View {
@@ -79,22 +110,64 @@ struct GameResultView: View {
                 }
             }
             
-            HStack(spacing: 80) {
-                Button(action: onUndo) {
-                    Image(systemName: "arrow.uturn.backward")
-                        .foregroundColor(.white)
-                        .opacity(0.8)
-                        .padding(8)
+            if !showingOptions {
+                Text("Tap for options")
+                    .font(.caption)
+                    .foregroundColor(.white)
+                    .opacity(0.6)
+            } else {
+                VStack(spacing: 12) {
+                    VStack(spacing: 8) {
+                        if canPlayOn {
+                            Button(action: onPlayOn) {
+                                Text("Play On")
+                                    .font(.body)
+                                    .fontWeight(.medium)
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 8)
+                                    .background(Color.blue)
+                                    .cornerRadius(20)
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                        }
+                        
+                        Button(action: onReturn) {
+                            Text("New Game")
+                                .font(.body)
+                                .fontWeight(.medium)
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 8)
+                                .background(Color.gray)
+                                .cornerRadius(20)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    }
+                    
+                    HStack(spacing: 80) {
+                        Button(action: onUndo) {
+                            Image(systemName: "arrow.uturn.backward")
+                                .foregroundColor(.white)
+                                .opacity(0.8)
+                                .padding(8)
+                        }
+                        .buttonStyle(TransparentButtonStyle())
+                        
+                        Button(action: onSettings) {
+                            Image(systemName: "gearshape")
+                                .foregroundColor(.white)
+                                .opacity(0.8)
+                                .padding(8)
+                        }
+                        .buttonStyle(TransparentButtonStyle())
+                    }
                 }
-                .buttonStyle(TransparentButtonStyle())
-                
-                Button(action: onSettings) {
-                    Image(systemName: "gearshape")
-                        .foregroundColor(.white)
-                        .opacity(0.8)
-                        .padding(8)
-                }
-                .buttonStyle(TransparentButtonStyle())
+            }
+        }
+        .onTapGesture {
+            withAnimation(.easeInOut(duration: 0.3)) {
+                showingOptions.toggle()
             }
         }
     }
@@ -112,6 +185,8 @@ struct GameResultView: View {
         setsToShow: 3,
         totalSets: 3,
         onUndo: {},
-        onSettings: {}
+        onSettings: {},
+        onPlayOn: {},
+        onReturn: {}
     )
 }

@@ -513,6 +513,18 @@ struct ContentView: View {
                     },
                     onSettings: {
                         showingSettings = true
+                    },
+                    onPlayOn: {
+                        // Reset game points for next set
+                        player1Points = "00"
+                        player2Points = "00"
+                        // Continue to next set
+                        currentSet += 1
+                        isMatchComplete = false
+                    },
+                    onReturn: {
+                        resetAllScores()
+                        isMatchComplete = false
                     }
                 )
             } else {

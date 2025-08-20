@@ -126,6 +126,35 @@ extension View {
     }
 }
 
+// MARK: - Settings Persistence
+extension Color {
+    static let colorMap: [String: Color] = [
+        "red": .red,
+        "orange": .orange,
+        "yellow": .yellow,
+        "green": .green,
+        "blue": .blue,
+        "purple": .purple,
+        "pink": .pink,
+        "cyan": .cyan,
+        "mint": .mint,
+        "indigo": .indigo
+    ]
+    
+    var name: String? {
+        for (name, color) in Color.colorMap {
+            if self == color {
+                return name
+            }
+        }
+        return nil
+    }
+    
+    static func fromName(_ name: String) -> Color? {
+        return colorMap[name]
+    }
+}
+
 struct ContentView: View {
     @State private var player2Points = "00"
     @State private var player2SetScore = [0,0,0,0,0]
@@ -137,8 +166,8 @@ struct ContentView: View {
     @State private var showingSettings = false
     @State private var player1Name = "Ana"
     @State private var player2Name = "Bob"
-    @State private var player1Color = Color.mint
-    @State private var player2Color = Color.indigo
+    @State private var player1Color = Color.blue
+    @State private var player2Color = Color.green
     @State private var setsToPlay = 3
     @State private var tieBreakRule = TieBreakRule.at66
 
@@ -160,6 +189,44 @@ struct ContentView: View {
 
     // History tracking
     @State private var gameHistory: [(player2Points: String, player1Points: String, player2SetScore: [Int], player1SetScore: [Int], currentSet: Int)] = []
+    
+    // MARK: - Settings Persistence
+    func loadSettings() {
+        player1Name = UserDefaults.standard.string(forKey: "player1Name") ?? "Ana"
+        player2Name = UserDefaults.standard.string(forKey: "player2Name") ?? "Bob"
+        
+        if let player1ColorName = UserDefaults.standard.string(forKey: "player1Color"),
+           let color1 = Color.fromName(player1ColorName) {
+            player1Color = color1
+        } else {
+            player1Color = .blue
+        }
+        
+        if let player2ColorName = UserDefaults.standard.string(forKey: "player2Color"),
+           let color2 = Color.fromName(player2ColorName) {
+            player2Color = color2
+        } else {
+            player2Color = .green
+        }
+        
+        setsToPlay = UserDefaults.standard.object(forKey: "setsToPlay") as? Int ?? 3
+        
+        if let tieBreakRuleString = UserDefaults.standard.string(forKey: "tieBreakRule"),
+           let rule = TieBreakRule(rawValue: tieBreakRuleString) {
+            tieBreakRule = rule
+        } else {
+            tieBreakRule = .at66
+        }
+    }
+    
+    func saveSettings() {
+        UserDefaults.standard.set(player1Name, forKey: "player1Name")
+        UserDefaults.standard.set(player2Name, forKey: "player2Name")
+        UserDefaults.standard.set(player1Color.name ?? "blue", forKey: "player1Color")
+        UserDefaults.standard.set(player2Color.name ?? "green", forKey: "player2Color")
+        UserDefaults.standard.set(setsToPlay, forKey: "setsToPlay")
+        UserDefaults.standard.set(tieBreakRule.rawValue, forKey: "tieBreakRule")
+    }
 
     // Computed property for dynamic set display
     var setsToShow: Int {
@@ -334,7 +401,7 @@ struct ContentView: View {
                 }
 
                 playerPoints = "00"
-                resetGameScores()
+                // Note: resetGameScores() will be called in the delayed update
             }
         } else {
             if hasWonGame(playerPoints) {
@@ -352,11 +419,11 @@ struct ContentView: View {
                     }
 
                     playerPoints = "00"
-                    resetGameScores()
+                    // Note: resetGameScores() will be called in the delayed update
                 } else {
                     // Check if we should continue or reset points
                     playerPoints = "00"
-                    resetGameScores()
+                    // Note: resetGameScores() will be called in the delayed update
                 }
             } else {
                 playerPoints = cycleScore(playerPoints)
@@ -381,6 +448,7 @@ struct ContentView: View {
                     player2Points = finalPlayerPoints
                     player2SetScore = finalPlayerSetScore
                 }
+                resetGameScores()
             }
         } else if setWon {
             triggerCelebration(type: .set)
@@ -394,6 +462,7 @@ struct ContentView: View {
                     player2Points = finalPlayerPoints
                     player2SetScore = finalPlayerSetScore
                 }
+                resetGameScores()
             }
         } else if gameWon {
             triggerCelebration(type: .game)
@@ -407,6 +476,7 @@ struct ContentView: View {
                     player2Points = finalPlayerPoints
                     player2SetScore = finalPlayerSetScore
                 }
+                resetGameScores()
             }
         } else {
             // No celebration, update immediately
@@ -545,6 +615,15 @@ struct ContentView: View {
             )
             .interactiveDismissDisabled()
         }
+        .onAppear {
+            loadSettings()
+        }
+        .onChange(of: player1Name) { _, _ in saveSettings() }
+        .onChange(of: player2Name) { _, _ in saveSettings() }
+        .onChange(of: player1Color) { _, _ in saveSettings() }
+        .onChange(of: player2Color) { _, _ in saveSettings() }
+        .onChange(of: setsToPlay) { _, _ in saveSettings() }
+        .onChange(of: tieBreakRule) { _, _ in saveSettings() }
     }
 }
 

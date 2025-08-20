@@ -24,11 +24,54 @@ struct SettingsView: View {
     let onReset: () -> Void
     @Environment(\.dismiss) private var dismiss
     
-    let colorOptions: [Color] = [.mint, .indigo, .red, .orange, .yellow, .green, .blue, .purple, .pink, .cyan]
+    let colorOptions: [Color] = [ .red, .orange, .yellow, .green, .blue, .purple, .pink, .cyan, .mint, .indigo]
     
     var body: some View {
         NavigationView {
             List {
+                Section("Number of Sets") {
+                        HStack(spacing: 12) {
+                            ForEach([1, 3, 5], id: \.self) { setCount in
+                                Button(action: {
+                                    setsToPlay = setCount
+                                }) {
+                                    Text("\(setCount)")
+                                        .font(.system(.body, design: .monospaced))
+                                        .fontWeight(setsToPlay == setCount ? .bold : .regular)
+                                        .foregroundColor(setsToPlay == setCount ? .white : .secondary)
+                                        .frame(width: 24, height: 24)
+                                        .background(
+                                            Circle()
+                                                .fill(setsToPlay == setCount ? Color.blue : Color.clear)
+                                        )
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                            }
+                        }
+                }
+                
+                Section("Tie-Break Rule") {
+                    VStack(spacing: 8) {
+                        ForEach(TieBreakRule.allCases, id: \.self) { rule in
+                            Button(action: {
+                                tieBreakRule = rule
+                            }) {
+                                HStack {
+                                    Text(rule.rawValue)
+                                        .font(.body)
+                                        .foregroundColor(.primary)
+                                    Spacer()
+                                    if tieBreakRule == rule {
+                                        Image(systemName: "checkmark")
+                                            .foregroundColor(.blue)
+                                    }
+                                }
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                        }
+                    }
+                }
+                
                 Section("\(player1Name) Color") {
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 5), spacing: 8) {
                         ForEach(colorOptions, id: \.self) { color in
@@ -79,48 +122,7 @@ struct SettingsView: View {
                     }
                 }
                 
-                Section("Number of Sets") {
-                        HStack(spacing: 12) {
-                            ForEach([1, 3, 5], id: \.self) { setCount in
-                                Button(action: {
-                                    setsToPlay = setCount
-                                }) {
-                                    Text("\(setCount)")
-                                        .font(.system(.body, design: .monospaced))
-                                        .fontWeight(setsToPlay == setCount ? .bold : .regular)
-                                        .foregroundColor(setsToPlay == setCount ? .white : .secondary)
-                                        .frame(width: 24, height: 24)
-                                        .background(
-                                            Circle()
-                                                .fill(setsToPlay == setCount ? Color.blue : Color.clear)
-                                        )
-                                }
-                                .buttonStyle(PlainButtonStyle())
-                            }
-                        }
-                }
-                
-                Section("Tie-Break Rule") {
-                    VStack(spacing: 8) {
-                        ForEach(TieBreakRule.allCases, id: \.self) { rule in
-                            Button(action: {
-                                tieBreakRule = rule
-                            }) {
-                                HStack {
-                                    Text(rule.rawValue)
-                                        .font(.body)
-                                        .foregroundColor(.primary)
-                                    Spacer()
-                                    if tieBreakRule == rule {
-                                        Image(systemName: "checkmark")
-                                            .foregroundColor(.blue)
-                                    }
-                                }
-                            }
-                            .buttonStyle(PlainButtonStyle())
-                        }
-                    }
-                }
+
                 
                 Section {
                     Button(action: {

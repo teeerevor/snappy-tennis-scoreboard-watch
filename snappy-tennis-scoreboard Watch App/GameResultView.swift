@@ -76,7 +76,8 @@ struct GameResultView: View {
     }
     
     var body: some View {
-        VStack(spacing: 16) {
+        ScrollView {
+            VStack(spacing: 16) {
             
             Text("\(winnerName) \(LocalizedStrings.getString("wins", language: language))")
                 .font(.title2)
@@ -109,19 +110,19 @@ struct GameResultView: View {
                 } else {
                     // Vertical layout for multiple sets
                     VStack {
-                        HStack(spacing: 20) {
-                            ForEach(0..<setsToShow, id: \.self) { setIndex in
+                        HStack(spacing: totalSets == 5 ? 12 : 16) {
+                            ForEach(0..<totalSets, id: \.self) { setIndex in
                                 Text("\(player1SetScore[setIndex])")
-                                    .font(.system(.title2, design: .monospaced))
+                                    .font(.system(.body, design: .monospaced))
                                     .fontWeight(.medium)
                                     .foregroundColor(player1DisplayColor)
                                     .opacity(player1Opacity)
                             }
                         }
-                        HStack(spacing: 20) {
-                            ForEach(0..<setsToShow, id: \.self) { setIndex in
+                        HStack(spacing: totalSets == 5 ? 12 : 16) {
+                            ForEach(0..<totalSets, id: \.self) { setIndex in
                                 Text("\(player2SetScore[setIndex])")
-                                    .font(.system(.title2, design: .monospaced))
+                                    .font(.system(.body, design: .monospaced))
                                     .fontWeight(.medium)
                                     .foregroundColor(player2DisplayColor)
                                     .opacity(player2Opacity)
@@ -184,6 +185,7 @@ struct GameResultView: View {
                         .buttonStyle(TransparentButtonStyle())
                     }
                 }
+            }
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

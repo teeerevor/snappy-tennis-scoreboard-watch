@@ -36,6 +36,20 @@ func fontSizeForMediumScore() -> CGFloat {
     }
 }
 
+func fontSizeForSmallScore() -> CGFloat {
+    let width = WKInterfaceDevice.current().screenBounds.width
+    switch width {
+    case 198...: // Ultra 49mm
+        return 28
+    case 184...: // 45/44mm
+        return 24
+    case 162...: // 41/40mm
+        return 20
+    default: // 38mm and others
+        return 16
+    }
+}
+
 struct LargeScoreText: ViewModifier {
     func body(content: Content) -> some View {
         content
@@ -52,6 +66,14 @@ struct MediumScoreText: ViewModifier {
     }
 }
 
+struct SmallScoreText: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .font(.system(size: fontSizeForSmallScore()))
+            .fontWeight(.medium)
+    }
+}
+
 struct TransparentButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
@@ -64,42 +86,56 @@ struct TransparentButtonStyle: ButtonStyle {
 struct FlipText: View {
     let text: String
     let color: Color
+    let useSmallFont: Bool
     @State private var isFlipping = false
     @State private var previousText: String = ""
 
-    init(text: String, color: Color) {
+    init(text: String, color: Color, useSmallFont: Bool = false) {
         self.text = text
         self.color = color
+        self.useSmallFont = useSmallFont
         self._previousText = State(initialValue: text)
     }
 
     var body: some View {
+        let fontSize = useSmallFont ? fontSizeForSmallScore() : fontSizeForMediumScore()
+        
         ZStack {
             // Background text (previous value)
-            Text(previousText)
-                .mediumScoreText()
-                .foregroundColor(color)
-                .rotation3DEffect(
-                    .degrees(isFlipping ? 85 : 0),
-                    axis: (x: 1, y: 0, z: 0),
-                    anchor: .center,
-                    perspective: 0.3
-                )
-                .opacity(isFlipping ? 0 : 1)
+            Group {
+                if useSmallFont {
+                    Text(previousText).smallScoreText()
+                } else {
+                    Text(previousText).mediumScoreText()
+                }
+            }
+            .foregroundColor(color)
+            .rotation3DEffect(
+                .degrees(isFlipping ? 85 : 0),
+                axis: (x: 1, y: 0, z: 0),
+                anchor: .center,
+                perspective: 0.3
+            )
+            .opacity(isFlipping ? 0 : 1)
 
             // Foreground text (new value)
-            Text(text)
-                .mediumScoreText()
-                .foregroundColor(color)
-                .rotation3DEffect(
-                    .degrees(isFlipping ? 0 : -85),
-                    axis: (x: 1, y: 0, z: 0),
-                    anchor: .center,
-                    perspective: 0.3
-                )
-                .opacity(isFlipping ? 1 : 0)
+            Group {
+                if useSmallFont {
+                    Text(text).smallScoreText()
+                } else {
+                    Text(text).mediumScoreText()
+                }
+            }
+            .foregroundColor(color)
+            .rotation3DEffect(
+                .degrees(isFlipping ? 0 : -85),
+                axis: (x: 1, y: 0, z: 0),
+                anchor: .center,
+                perspective: 0.3
+            )
+            .opacity(isFlipping ? 1 : 0)
         }
-        .frame(width: fontSizeForMediumScore() * 0.8, height: fontSizeForMediumScore() * 1.2)
+        .frame(width: fontSize * 0.8, height: fontSize * 1.2)
         .onChange(of: text) { oldValue, newValue in
             if oldValue != newValue {
                 previousText = oldValue
@@ -123,6 +159,10 @@ extension View {
 
     func mediumScoreText() -> some View {
         modifier(MediumScoreText())
+    }
+    
+    func smallScoreText() -> some View {
+        modifier(SmallScoreText())
     }
 }
 
@@ -239,12 +279,7 @@ struct ContentView: View {
 
     // Computed property for dynamic set display
     var setsToShow: Int {
-        if setsToPlay == 5 {
-            // Start with 3 sets, expand to 4 when entering set 4, expand to 5 when entering set 5
-            return min(max(3, currentSet + 1), 5)
-        } else {
-            return setsToPlay
-        }
+        return setsToPlay  // Always show all sets for the match type
     }
 
     func cycleScore(_ currentScore: String) -> String {
@@ -534,7 +569,7 @@ struct ContentView: View {
     }
 
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 12) {
             if isMatchComplete {
                 GameResultView(
                     player1SetScore: player1SetScore,
@@ -599,7 +634,7 @@ struct ContentView: View {
                         }
                 }
 
-                VStack(spacing: 4) {
+                VStack(spacing: 12) {
                     if setsToPlay == 1 {
                         // Horizontal layout for single set
                         HStack(spacing: 8) {
@@ -613,14 +648,14 @@ struct ContentView: View {
                     } else {
                         // Vertical layout for multiple sets
                         VStack {
-                            HStack {
+                            HStack(spacing: setsToPlay == 5 ? 12 : 16) {
                                 ForEach(0..<setsToShow, id: \.self) { setIndex in
-                                    FlipText(text: "\(player1SetScore[setIndex])", color: player1Color)
+                                    FlipText(text: "\(player1SetScore[setIndex])", color: player1Color, useSmallFont: true)
                                 }
                             }
-                            HStack {
+                            HStack(spacing: setsToPlay == 5 ? 12 : 16) {
                                 ForEach(0..<setsToShow, id: \.self) { setIndex in
-                                    FlipText(text: "\(player2SetScore[setIndex])", color: player2Color)
+                                    FlipText(text: "\(player2SetScore[setIndex])", color: player2Color, useSmallFont: true)
                                 }
                             }
                         }

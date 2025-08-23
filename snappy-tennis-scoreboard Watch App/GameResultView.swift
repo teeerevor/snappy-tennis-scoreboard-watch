@@ -53,13 +53,9 @@ struct GameResultView: View {
     }
     
     private var canPlayOn: Bool {
-        // Check if match is truly complete (winner has required number of sets)
-        let player1Wins = countSetsWon(player1SetScore, player2SetScore)
-        let player2Wins = countSetsWon(player2SetScore, player1SetScore)
-        let setsToWin = (totalSets + 1) / 2  // 1->1, 3->2, 5->3
-        
-        // If either player has won the required number of sets, can't play on
-        return player1Wins < setsToWin && player2Wins < setsToWin
+        // Play on button should always be visible except on the 5th set of a 5-set match
+        let currentSetNumber = setsToShow
+        return !(totalSets == 5 && currentSetNumber == 5)
     }
     
     private func countSetsWon(_ playerSetScore: [Int], _ opponentSetScore: [Int]) -> Int {

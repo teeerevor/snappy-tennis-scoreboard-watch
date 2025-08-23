@@ -336,6 +336,24 @@ struct ContentView: View {
         } else if player2Wins >= setsToWin {
             return player2Name
         }
+        
+        // If we've completed all sets but no traditional winner, return whoever has more sets
+        let completedSets = max(player1Wins + player2Wins, 1)  // At least 1 set completed
+        if completedSets >= setsToPlay {
+            if player1Wins > player2Wins {
+                return player1Name
+            } else if player2Wins > player1Wins {
+                return player2Name
+            }
+            // If tied, return player with higher current set score
+            let currentSetIndex = min(currentSet, player1SetScore.count - 1)
+            if player1SetScore[currentSetIndex] > player2SetScore[currentSetIndex] {
+                return player1Name
+            } else {
+                return player2Name
+            }
+        }
+        
         return nil
     }
 
@@ -408,6 +426,12 @@ struct ContentView: View {
                 } else {
                     currentSet += 1
                 }
+                
+                // Check if this is the end of the final set (regardless of match win)
+                let completedSetNumber = currentSet + 1  // currentSet is 0-based, convert to 1-based
+                if completedSetNumber >= setsToPlay {
+                    matchWon = true  // Force match completion view
+                }
 
                 playerPoints = "00"
                 // Note: resetGameScores() will be called in the delayed update
@@ -425,6 +449,12 @@ struct ContentView: View {
                         matchWon = true
                     } else {
                         currentSet += 1
+                    }
+                    
+                    // Check if this is the end of the final set (regardless of match win)
+                    let completedSetNumber = currentSet + 1  // currentSet is 0-based, convert to 1-based
+                    if completedSetNumber >= setsToPlay {
+                        matchWon = true  // Force match completion view
                     }
 
                     playerPoints = "00"
@@ -527,8 +557,23 @@ struct ContentView: View {
                         // Reset game points for next set
                         player1Points = "00"
                         player2Points = "00"
-                        // Continue to next set
-                        currentSet += 1
+                        
+                        // Handle match type transitions based on current state
+                        let currentSetNumber = currentSet + 1  // 1-based set number
+                        
+                        if setsToPlay == 1 {
+                            // 1 set match -> switch to 3 set match
+                            setsToPlay = 3
+                            currentSet += 1
+                        } else if setsToPlay == 3 && currentSetNumber == 3 {
+                            // Final set of 3 set match -> switch to 5 set match
+                            setsToPlay = 5
+                            currentSet += 1
+                        } else {
+                            // 2nd set of 3 set match, or 3rd/4th set of 5 set match -> just continue
+                            currentSet += 1
+                        }
+                        
                         isMatchComplete = false
                     },
                     onReturn: {
@@ -559,13 +604,11 @@ struct ContentView: View {
                         // Horizontal layout for single set
                         HStack(spacing: 8) {
                             FlipText(text: "\(player1SetScore[0])", color: player1Color)
-                                .scaleEffect(scoreUpdateAnimation ? 1.05 : 1.0)
                             Text("-")
                                 .mediumScoreText()
                                 .foregroundColor(.white)
                                 .opacity(0.6)
                             FlipText(text: "\(player2SetScore[0])", color: player2Color)
-                                .scaleEffect(scoreUpdateAnimation ? 1.05 : 1.0)
                         }
                     } else {
                         // Vertical layout for multiple sets
@@ -573,13 +616,11 @@ struct ContentView: View {
                             HStack {
                                 ForEach(0..<setsToShow, id: \.self) { setIndex in
                                     FlipText(text: "\(player1SetScore[setIndex])", color: player1Color)
-                                        .scaleEffect(scoreUpdateAnimation ? 1.05 : 1.0)
                                 }
                             }
                             HStack {
                                 ForEach(0..<setsToShow, id: \.self) { setIndex in
                                     FlipText(text: "\(player2SetScore[setIndex])", color: player2Color)
-                                        .scaleEffect(scoreUpdateAnimation ? 1.05 : 1.0)
                                 }
                             }
                         }

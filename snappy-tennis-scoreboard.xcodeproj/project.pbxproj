@@ -511,7 +511,7 @@
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = ULH45YJ22R;
 				INFOPLIST_KEY_CFBundleDisplayName = "snappy-tennis-scoreboard";
 				MARKETING_VERSION = 1.1;
@@ -528,7 +528,7 @@
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = ULH45YJ22R;
 				INFOPLIST_KEY_CFBundleDisplayName = "snappy-tennis-scoreboard";
 				MARKETING_VERSION = 1.1;

@@ -13,6 +13,11 @@ enum TieBreakRule: String, CaseIterable {
     case none = "None"
 }
 
+enum DeuceType: String, CaseIterable {
+    case short = "Short Deuce"
+    case long = "Long Deuce"
+}
+
 enum Language: String, CaseIterable, Identifiable {
     case english = "en"
     case spanish = "es"
@@ -58,6 +63,7 @@ struct LocalizedStrings {
                 "tieBreakRule": "Tie-Break Rule",
                 "playerNames": "Player Names",
                 "language": "Language",
+                "deuceType": "Deuce Type",
                 "tapForOptions": "Tap for options",
                 "wins": "wins!"
             ],
@@ -77,6 +83,7 @@ struct LocalizedStrings {
                 "tieBreakRule": "Regla de Tie-Break",
                 "playerNames": "Nombres de Jugadores",
                 "language": "Idioma",
+                "deuceType": "Tipo de Deuce",
                 "tapForOptions": "Tocar para opciones",
                 "wins": "¡gana!"
             ],
@@ -96,6 +103,7 @@ struct LocalizedStrings {
                 "tieBreakRule": "Règle de Tie-Break",
                 "playerNames": "Noms des Joueurs",
                 "language": "Langue",
+                "deuceType": "Type de Deuce",
                 "tapForOptions": "Appuyer pour options",
                 "wins": "gagne!"
             ],
@@ -115,6 +123,7 @@ struct LocalizedStrings {
                 "tieBreakRule": "Tie-Break-Regel",
                 "playerNames": "Spielernamen",
                 "language": "Sprache",
+                "deuceType": "Deuce-Typ",
                 "tapForOptions": "Für Optionen tippen",
                 "wins": "gewinnt!"
             ],
@@ -134,6 +143,7 @@ struct LocalizedStrings {
                 "tieBreakRule": "Regola del Tie-Break",
                 "playerNames": "Nomi Giocatori",
                 "language": "Lingua",
+                "deuceType": "Tipo di Deuce",
                 "tapForOptions": "Tocca per opzioni",
                 "wins": "vince!"
             ],
@@ -153,6 +163,7 @@ struct LocalizedStrings {
                 "tieBreakRule": "Regra do Tie-Break",
                 "playerNames": "Nomes dos Jogadores",
                 "language": "Idioma",
+                "deuceType": "Tipo de Deuce",
                 "tapForOptions": "Toque para opções",
                 "wins": "vence!"
             ],
@@ -172,6 +183,7 @@ struct LocalizedStrings {
                 "tieBreakRule": "抢七规则",
                 "playerNames": "选手姓名",
                 "language": "语言",
+                "deuceType": "平分类型",
                 "tapForOptions": "点击查看选项",
                 "wins": "获胜！"
             ],
@@ -191,6 +203,7 @@ struct LocalizedStrings {
                 "tieBreakRule": "टाई-ब्रेक नियम",
                 "playerNames": "खिलाड़ियों के नाम",
                 "language": "भाषा",
+                "deuceType": "ड्यूस प्रकार",
                 "tapForOptions": "विकल्पों के लिए टैप करें",
                 "wins": "जीत गया!"
             ]
@@ -207,6 +220,7 @@ struct SettingsView: View {
     @Binding var player2Color: Color
     @Binding var setsToPlay: Int
     @Binding var tieBreakRule: TieBreakRule
+    @Binding var deuceType: DeuceType
     @Binding var language: Language
     
     let onReset: () -> Void
@@ -250,6 +264,28 @@ struct SettingsView: View {
                                         .foregroundColor(.primary)
                                     Spacer()
                                     if tieBreakRule == rule {
+                                        Image(systemName: "checkmark")
+                                            .foregroundColor(.blue)
+                                    }
+                                }
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                        }
+                    }
+                }
+                
+                Section(LocalizedStrings.getString("deuceType", language: language)) {
+                    VStack(spacing: 8) {
+                        ForEach(DeuceType.allCases, id: \.self) { type in
+                            Button(action: {
+                                deuceType = type
+                            }) {
+                                HStack {
+                                    Text(type.rawValue)
+                                        .font(.body)
+                                        .foregroundColor(.primary)
+                                    Spacer()
+                                    if deuceType == type {
                                         Image(systemName: "checkmark")
                                             .foregroundColor(.blue)
                                     }

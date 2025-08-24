@@ -214,6 +214,7 @@ struct ContentView: View {
     @State private var player2Color = Color.green
     @State private var setsToPlay = 3
     @State private var tieBreakRule = TieBreakRule.at66
+    @State private var deuceType = DeuceType.short
     @State private var language = Language.english
 
     // Celebration
@@ -263,6 +264,13 @@ struct ContentView: View {
             tieBreakRule = .at66
         }
         
+        if let deuceTypeString = UserDefaults.standard.string(forKey: "deuceType"),
+           let type = DeuceType(rawValue: deuceTypeString) {
+            deuceType = type
+        } else {
+            deuceType = .short
+        }
+        
         if let languageString = UserDefaults.standard.string(forKey: "language"),
            let lang = Language(rawValue: languageString) {
             language = lang
@@ -278,6 +286,7 @@ struct ContentView: View {
         UserDefaults.standard.set(player2Color.name ?? "green", forKey: "player2Color")
         UserDefaults.standard.set(setsToPlay, forKey: "setsToPlay")
         UserDefaults.standard.set(tieBreakRule.rawValue, forKey: "tieBreakRule")
+        UserDefaults.standard.set(deuceType.rawValue, forKey: "deuceType")
         UserDefaults.standard.set(language.rawValue, forKey: "language")
     }
 
@@ -287,9 +296,6 @@ struct ContentView: View {
     }
 
     func cycleScore(_ currentScore: String) -> String {
-        if longDeuce {
-          // TODO: Implement long deuce
-        }
         if let currentIndex = pointValues.firstIndex(of: currentScore) {
             let nextIndex = (currentIndex + 1) % pointValues.count
             return pointValues[nextIndex]
@@ -323,8 +329,17 @@ struct ContentView: View {
       return personScore >= 7 && personScore - opponentScore >= 2 ? true : false
     }
 
-    func hasWonGame(_ personScore: String) -> Bool {
-      return personScore == "40" ? true : false
+    func hasWonGame(_ personScore: String, _ opponentScore: String) -> Bool {
+        if deuceType == .short {
+            return personScore == "40"
+        } else {
+            // Long deuce: need to win by 2 when both at 40
+            if personScore == "40" && opponentScore != "40" {
+                return true
+            }
+            // Win from advantage
+            return personScore == "AD"
+        }
     }
 
     func hasWonSet(_ personSetScore: Int, _ opponentSetScore: Int) -> Bool {
@@ -473,7 +488,8 @@ struct ContentView: View {
                 // Note: resetGameScores() will be called in the delayed update
             }
         } else {
-            if hasWonGame(playerPoints) {
+            let opponentPoints = isPlayer1 ? player2Points : player1Points
+            if hasWonGame(playerPoints, opponentPoints) {
                 playerSetScore[currentSet] += 1
                 gameWon = true
 
@@ -498,10 +514,39 @@ struct ContentView: View {
                     // Note: resetGameScores() will be called in the delayed update
                 }
             } else {
-                playerPoints = cycleScore(playerPoints)
+                // Handle long deuce logic
+                if deuceType == .long {
+                    let opponentPoints = isPlayer1 ? player2Points : player1Points
+                    if playerPoints == "40" && opponentPoints == "40" {
+                        // From 40-40 to advantage
+                        playerPoints = "AD"
+                        // Set opponent to disadvantage (will be updated below)
+                    } else if playerPoints == "-" && opponentPoints == "AD" {
+                        // From disadvantage back to deuce
+                        playerPoints = "40"
+                        // Set opponent back to 40 (will be updated below)
+                    } else {
+                        playerPoints = cycleScore(playerPoints)
+                    }
+                } else {
+                    playerPoints = cycleScore(playerPoints)
+                }
             }
         }
 
+        // Handle opponent score changes for long deuce
+        var finalOpponentPoints = isPlayer1 ? player2Points : player1Points
+        if deuceType == .long && !gameWon && !setWon && !matchWon {
+            let opponentPoints = isPlayer1 ? player2Points : player1Points
+            if playerPoints == "AD" && opponentPoints == "40" {
+                // Player got advantage, opponent goes to disadvantage
+                finalOpponentPoints = "-"
+            } else if playerPoints == "40" && opponentPoints == "AD" {
+                // Back to deuce from advantage
+                finalOpponentPoints = "40"
+            }
+        }
+        
         // Store the calculated values for delayed update
         let finalPlayerPoints = playerPoints
         let finalPlayerSetScore = playerSetScore
@@ -516,9 +561,11 @@ struct ContentView: View {
                 if isPlayer1 {
                     player1Points = finalPlayerPoints
                     player1SetScore = finalPlayerSetScore
+                    player2Points = finalOpponentPoints
                 } else {
                     player2Points = finalPlayerPoints
                     player2SetScore = finalPlayerSetScore
+                    player1Points = finalOpponentPoints
                 }
                 resetGameScores()
             }
@@ -530,9 +577,11 @@ struct ContentView: View {
                 if isPlayer1 {
                     player1Points = finalPlayerPoints
                     player1SetScore = finalPlayerSetScore
+                    player2Points = finalOpponentPoints
                 } else {
                     player2Points = finalPlayerPoints
                     player2SetScore = finalPlayerSetScore
+                    player1Points = finalOpponentPoints
                 }
                 resetGameScores()
             }
@@ -544,9 +593,11 @@ struct ContentView: View {
                 if isPlayer1 {
                     player1Points = finalPlayerPoints
                     player1SetScore = finalPlayerSetScore
+                    player2Points = finalOpponentPoints
                 } else {
                     player2Points = finalPlayerPoints
                     player2SetScore = finalPlayerSetScore
+                    player1Points = finalOpponentPoints
                 }
                 resetGameScores()
             }
@@ -555,9 +606,11 @@ struct ContentView: View {
             if isPlayer1 {
                 player1Points = finalPlayerPoints
                 player1SetScore = finalPlayerSetScore
+                player2Points = finalOpponentPoints
             } else {
                 player2Points = finalPlayerPoints
                 player2SetScore = finalPlayerSetScore
+                player1Points = finalOpponentPoints
             }
 
             withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
@@ -696,6 +749,7 @@ struct ContentView: View {
                 player2Color: $player2Color,
                 setsToPlay: $setsToPlay,
                 tieBreakRule: $tieBreakRule,
+                deuceType: $deuceType,
                 language: $language,
                 onReset: resetAllScores
             )
@@ -728,6 +782,7 @@ struct ContentView: View {
         .onChange(of: player2Color) { _, _ in saveSettings() }
         .onChange(of: setsToPlay) { _, _ in saveSettings() }
         .onChange(of: tieBreakRule) { _, _ in saveSettings() }
+        .onChange(of: deuceType) { _, _ in saveSettings() }
         .onChange(of: language) { _, _ in saveSettings() }
     }
 }

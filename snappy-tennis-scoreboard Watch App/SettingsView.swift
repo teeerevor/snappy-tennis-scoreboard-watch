@@ -260,25 +260,16 @@ struct SettingsView: View {
                     }
                 }
                 
-                Section(LocalizedStrings.getString("language", language: language)) {
-                    VStack(spacing: 8) {
-                        ForEach(Language.allCases) { lang in
-                            Button(action: {
-                                language = lang
-                            }) {
-                                HStack {
-                                    Text(lang.displayName)
-                                        .font(.body)
-                                        .foregroundColor(.primary)
-                                    Spacer()
-                                    if language == lang {
-                                        Image(systemName: "checkmark")
-                                            .foregroundColor(.blue)
-                                    }
-                                }
-                            }
-                            .buttonStyle(PlainButtonStyle())
+                Section {
+                    Button(action: {
+                        onReset()
+                        dismiss()
+                    }) {
+                        HStack {
+                            Image(systemName: "arrow.clockwise")
+                            Text(LocalizedStrings.getString("reset", language: language))
                         }
+                        .foregroundColor(.red)
                     }
                 }
                 
@@ -332,20 +323,29 @@ struct SettingsView: View {
                     }
                 }
                 
-
-                
-                Section {
-                    Button(action: {
-                        onReset()
-                        dismiss()
-                    }) {
-                        HStack {
-                            Image(systemName: "arrow.clockwise")
-                            Text(LocalizedStrings.getString("reset", language: language))
+                Section(LocalizedStrings.getString("language", language: language)) {
+                    VStack(spacing: 8) {
+                        ForEach(Language.allCases) { lang in
+                            Button(action: {
+                                language = lang
+                            }) {
+                                HStack {
+                                    Text(lang.displayName)
+                                        .font(.body)
+                                        .foregroundColor(.primary)
+                                    Spacer()
+                                    if language == lang {
+                                        Image(systemName: "checkmark")
+                                            .foregroundColor(.blue)
+                                    }
+                                }
+                            }
+                            .buttonStyle(PlainButtonStyle())
                         }
-                        .foregroundColor(.red)
                     }
                 }
+                
+
             }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {

@@ -87,13 +87,15 @@ struct FlipText: View {
     let text: String
     let color: Color
     let useSmallFont: Bool
+    let opacity: Double
     @State private var isFlipping = false
     @State private var previousText: String = ""
 
-    init(text: String, color: Color, useSmallFont: Bool = false) {
+    init(text: String, color: Color, useSmallFont: Bool = false, opacity: Double = 1.0) {
         self.text = text
         self.color = color
         self.useSmallFont = useSmallFont
+        self.opacity = opacity
         self._previousText = State(initialValue: text)
     }
 
@@ -110,13 +112,14 @@ struct FlipText: View {
                 }
             }
             .foregroundColor(color)
+            .opacity(opacity)
             .rotation3DEffect(
                 .degrees(isFlipping ? 85 : 0),
                 axis: (x: 1, y: 0, z: 0),
                 anchor: .center,
                 perspective: 0.3
             )
-            .opacity(isFlipping ? 0 : 1)
+            .opacity(isFlipping ? 0 : opacity)
 
             // Foreground text (new value)
             Group {
@@ -127,13 +130,14 @@ struct FlipText: View {
                 }
             }
             .foregroundColor(color)
+            .opacity(opacity)
             .rotation3DEffect(
                 .degrees(isFlipping ? 0 : -85),
                 axis: (x: 1, y: 0, z: 0),
                 anchor: .center,
                 perspective: 0.3
             )
-            .opacity(isFlipping ? 1 : 0)
+            .opacity(isFlipping ? opacity : 0)
         }
         .frame(width: fontSize * 0.8, height: fontSize * 1.2)
         .onChange(of: text) { oldValue, newValue in
@@ -462,11 +466,8 @@ struct ContentView: View {
                     currentSet += 1
                 }
                 
-                // Check if this is the end of the final set (regardless of match win)
-                let completedSetNumber = currentSet + 1  // currentSet is 0-based, convert to 1-based
-                if completedSetNumber >= setsToPlay {
-                    matchWon = true  // Force match completion view
-                }
+                // Only force match completion if someone has won the required number of sets
+                // Don't force completion just because we've played all sets
 
                 playerPoints = "00"
                 // Note: resetGameScores() will be called in the delayed update
@@ -486,11 +487,8 @@ struct ContentView: View {
                         currentSet += 1
                     }
                     
-                    // Check if this is the end of the final set (regardless of match win)
-                    let completedSetNumber = currentSet + 1  // currentSet is 0-based, convert to 1-based
-                    if completedSetNumber >= setsToPlay {
-                        matchWon = true  // Force match completion view
-                    }
+                    // Only force match completion if someone has won the required number of sets
+                    // Don't force completion just because we've played all sets
 
                     playerPoints = "00"
                     // Note: resetGameScores() will be called in the delayed update
@@ -601,7 +599,7 @@ struct ContentView: View {
                             setsToPlay = 3
                             currentSet += 1
                         } else if setsToPlay == 3 && currentSetNumber == 3 {
-                            // Final set of 3 set match -> switch to 5 set match
+                            // After 3rd set is complete -> switch to 5 set match
                             setsToPlay = 5
                             currentSet += 1
                         } else {
@@ -650,12 +648,18 @@ struct ContentView: View {
                         VStack {
                             HStack(spacing: setsToPlay == 5 ? 12 : 16) {
                                 ForEach(0..<setsToShow, id: \.self) { setIndex in
-                                    FlipText(text: "\(player1SetScore[setIndex])", color: player1Color, useSmallFont: true)
+                                    FlipText(text: "\(player1SetScore[setIndex])", 
+                                           color: setIndex <= currentSet ? player1Color : .gray, 
+                                           useSmallFont: true,
+                                           opacity: setIndex <= currentSet ? 1.0 : 0.6)
                                 }
                             }
                             HStack(spacing: setsToPlay == 5 ? 12 : 16) {
                                 ForEach(0..<setsToShow, id: \.self) { setIndex in
-                                    FlipText(text: "\(player2SetScore[setIndex])", color: player2Color, useSmallFont: true)
+                                    FlipText(text: "\(player2SetScore[setIndex])", 
+                                           color: setIndex <= currentSet ? player2Color : .gray, 
+                                           useSmallFont: true,
+                                           opacity: setIndex <= currentSet ? 1.0 : 0.6)
                                 }
                             }
                         }

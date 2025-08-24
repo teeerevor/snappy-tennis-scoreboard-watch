@@ -75,6 +75,11 @@ struct GameResultView: View {
                (personSetScore == 7 && opponentSetScore == 6)
     }
     
+    private func setHasBeenPlayed(_ setIndex: Int) -> Bool {
+        // A set has been played if either player has a score > 0
+        return player1SetScore[setIndex] > 0 || player2SetScore[setIndex] > 0
+    }
+    
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
@@ -115,8 +120,8 @@ struct GameResultView: View {
                                 Text("\(player1SetScore[setIndex])")
                                     .font(.system(.body, design: .monospaced))
                                     .fontWeight(.medium)
-                                    .foregroundColor(player1DisplayColor)
-                                    .opacity(player1Opacity)
+                                    .foregroundColor(setHasBeenPlayed(setIndex) ? player1DisplayColor : loserColor)
+                                    .opacity(setHasBeenPlayed(setIndex) ? player1Opacity : 0.6)
                             }
                         }
                         HStack(spacing: totalSets == 5 ? 12 : 16) {
@@ -124,8 +129,8 @@ struct GameResultView: View {
                                 Text("\(player2SetScore[setIndex])")
                                     .font(.system(.body, design: .monospaced))
                                     .fontWeight(.medium)
-                                    .foregroundColor(player2DisplayColor)
-                                    .opacity(player2Opacity)
+                                    .foregroundColor(setHasBeenPlayed(setIndex) ? player2DisplayColor : loserColor)
+                                    .opacity(setHasBeenPlayed(setIndex) ? player2Opacity : 0.6)
                             }
                         }
                     }

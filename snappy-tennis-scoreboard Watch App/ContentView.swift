@@ -101,7 +101,7 @@ struct FlipText: View {
 
     var body: some View {
         let fontSize = useSmallFont ? fontSizeForSmallScore() : fontSizeForMediumScore()
-        
+
         ZStack {
             // Background text (previous value)
             Group {
@@ -164,7 +164,7 @@ extension View {
     func mediumScoreText() -> some View {
         modifier(MediumScoreText())
     }
-    
+
     func smallScoreText() -> some View {
         modifier(SmallScoreText())
     }
@@ -184,7 +184,7 @@ extension Color {
         "mint": .mint,
         "indigo": .indigo
     ]
-    
+
     var name: String? {
         for (name, color) in Color.colorMap {
             if self == color {
@@ -193,7 +193,7 @@ extension Color {
         }
         return nil
     }
-    
+
     static func fromName(_ name: String) -> Color? {
         return colorMap[name]
     }
@@ -216,6 +216,7 @@ struct ContentView: View {
     @State private var tieBreakRule = TieBreakRule.at66
     @State private var deuceType = DeuceType.short
     @State private var language = Language.english
+    @State private var serverSetting: ServerSetting = .player1
 
     // Celebration
     @State private var showingCelebration = false
@@ -226,6 +227,10 @@ struct ContentView: View {
     @State private var isMatchComplete = false
     @State private var matchWinner = ""
 
+    // Serving
+    @State private var isPlayer1Serving = true
+    @State private var tieBreakServeCount = 0
+
     let pointValues = ["00", "15", "30", "40"]
     let deuceValues = ["AD", "-"]
     let gameText = "GAME"
@@ -234,51 +239,61 @@ struct ContentView: View {
     let longDeuce = false
 
     // History tracking
-    @State private var gameHistory: [(player2Points: String, player1Points: String, player2SetScore: [Int], player1SetScore: [Int], currentSet: Int)] = []
-    
+    @State private var gameHistory: [(player2Points: String, player1Points: String, player2SetScore: [Int], player1SetScore: [Int], currentSet: Int, isPlayer1Serving: Bool, tieBreakServeCount: Int)] = []
+
     // MARK: - Settings Persistence
     func loadSettings() {
         player1Name = UserDefaults.standard.string(forKey: "player1Name") ?? "Ana"
         player2Name = UserDefaults.standard.string(forKey: "player2Name") ?? "Bob"
-        
+
         if let player1ColorName = UserDefaults.standard.string(forKey: "player1Color"),
            let color1 = Color.fromName(player1ColorName) {
             player1Color = color1
         } else {
             player1Color = .blue
         }
-        
+
         if let player2ColorName = UserDefaults.standard.string(forKey: "player2Color"),
            let color2 = Color.fromName(player2ColorName) {
             player2Color = color2
         } else {
             player2Color = .green
         }
-        
+
         setsToPlay = UserDefaults.standard.object(forKey: "setsToPlay") as? Int ?? 3
-        
+
         if let tieBreakRuleString = UserDefaults.standard.string(forKey: "tieBreakRule"),
            let rule = TieBreakRule(rawValue: tieBreakRuleString) {
             tieBreakRule = rule
         } else {
             tieBreakRule = .at66
         }
-        
+
         if let deuceTypeString = UserDefaults.standard.string(forKey: "deuceType"),
            let type = DeuceType(rawValue: deuceTypeString) {
             deuceType = type
         } else {
             deuceType = .short
         }
-        
+
         if let languageString = UserDefaults.standard.string(forKey: "language"),
            let lang = Language(rawValue: languageString) {
             language = lang
         } else {
             language = .english
         }
+
+        if let serverSettingString = UserDefaults.standard.string(forKey: "serverSetting"),
+           let server = ServerSetting(rawValue: serverSettingString) {
+            serverSetting = server
+        } else {
+            serverSetting = .player1
+        }
+
+        // Sync serving state with server setting
+        isPlayer1Serving = (serverSetting == .player1)
     }
-    
+
     func saveSettings() {
         UserDefaults.standard.set(player1Name, forKey: "player1Name")
         UserDefaults.standard.set(player2Name, forKey: "player2Name")
@@ -288,6 +303,7 @@ struct ContentView: View {
         UserDefaults.standard.set(tieBreakRule.rawValue, forKey: "tieBreakRule")
         UserDefaults.standard.set(deuceType.rawValue, forKey: "deuceType")
         UserDefaults.standard.set(language.rawValue, forKey: "language")
+        UserDefaults.standard.set(serverSetting.rawValue, forKey: "serverSetting")
     }
 
     // Computed property for dynamic set display
@@ -309,7 +325,9 @@ struct ContentView: View {
             player1Points: player1Points,
             player2SetScore: player2SetScore,
             player1SetScore: player1SetScore,
-            currentSet: currentSet
+            currentSet: currentSet,
+            isPlayer1Serving: isPlayer1Serving,
+            tieBreakServeCount: tieBreakServeCount
         )
         gameHistory.append(currentState)
     }
@@ -323,6 +341,8 @@ struct ContentView: View {
         player2SetScore = previousState.player2SetScore
         player1SetScore = previousState.player1SetScore
         currentSet = previousState.currentSet
+        isPlayer1Serving = previousState.isPlayer1Serving
+        tieBreakServeCount = previousState.tieBreakServeCount
     }
 
     func hasWonTieBreak(_ personScore: Int, _ opponentScore: Int) -> Bool {
@@ -390,7 +410,7 @@ struct ContentView: View {
         } else if player2Wins >= setsToWin {
             return player2Name
         }
-        
+
         // If we've completed all sets but no traditional winner, return whoever has more sets
         let completedSets = max(player1Wins + player2Wins, 1)  // At least 1 set completed
         if completedSets >= setsToPlay {
@@ -407,7 +427,7 @@ struct ContentView: View {
                 return player2Name
             }
         }
-        
+
         return nil
     }
 
@@ -430,6 +450,8 @@ struct ContentView: View {
         gameHistory.removeAll()
         isMatchComplete = false
         matchWinner = ""
+        isPlayer1Serving = (serverSetting == .player1)
+        tieBreakServeCount = 0
     }
 
     func isTieBreak() -> Bool {
@@ -460,6 +482,13 @@ struct ContentView: View {
             playerTieBreakPoints += 1
             playerPoints = playerTieBreakPoints >= 10 ? "\(playerTieBreakPoints)" :"0\(playerTieBreakPoints)"
 
+            // Handle serve changes in tiebreak (first server serves 1 point, then alternates every 2 points)
+            tieBreakServeCount += 1
+            if (tieBreakServeCount == 1) || (tieBreakServeCount > 1 && (tieBreakServeCount - 1) % 2 == 0) {
+                isPlayer1Serving.toggle()
+                serverSetting = isPlayer1Serving ? .player1 : .player2
+            }
+
             if hasWonTieBreak(playerTieBreakPoints, opponentTieBreakPoints) {
                 // Set the correct final score based on tie break rule
                 let opponentSetScore = isPlayer1 ? player2SetScore : player1SetScore
@@ -479,8 +508,12 @@ struct ContentView: View {
                     matchWon = true
                 } else {
                     currentSet += 1
+                    // Reset tiebreak serve count and switch serve for next set
+                    tieBreakServeCount = 0
+                    isPlayer1Serving.toggle()
+                    serverSetting = isPlayer1Serving ? .player1 : .player2
                 }
-                
+
                 // Only force match completion if someone has won the required number of sets
                 // Don't force completion just because we've played all sets
 
@@ -492,6 +525,9 @@ struct ContentView: View {
             if hasWonGame(playerPoints, opponentPoints) {
                 playerSetScore[currentSet] += 1
                 gameWon = true
+                // Switch serve at end of game
+                isPlayer1Serving.toggle()
+                serverSetting = isPlayer1Serving ? .player1 : .player2
 
                 let opponentSetScore = isPlayer1 ? player2SetScore : player1SetScore
                 if hasWonSet(playerSetScore[currentSet], opponentSetScore[currentSet]) {
@@ -501,8 +537,11 @@ struct ContentView: View {
                         matchWon = true
                     } else {
                         currentSet += 1
+                        // Switch serve for new set (undo the game switch since set changes serving order)
+                        isPlayer1Serving.toggle()
+                        serverSetting = isPlayer1Serving ? .player1 : .player2
                     }
-                    
+
                     // Only force match completion if someone has won the required number of sets
                     // Don't force completion just because we've played all sets
 
@@ -546,7 +585,7 @@ struct ContentView: View {
                 finalOpponentPoints = "40"
             }
         }
-        
+
         // Store the calculated values for delayed update
         let finalPlayerPoints = playerPoints
         let finalPlayerSetScore = playerSetScore
@@ -643,10 +682,10 @@ struct ContentView: View {
                         // Reset game points for next set
                         player1Points = "00"
                         player2Points = "00"
-                        
+
                         // Handle match type transitions based on current state
                         let currentSetNumber = currentSet + 1  // 1-based set number
-                        
+
                         if setsToPlay == 1 {
                             // 1 set match -> switch to 3 set match
                             setsToPlay = 3
@@ -659,7 +698,7 @@ struct ContentView: View {
                             // 2nd set of 3 set match, or 3rd/4th set of 5 set match -> just continue
                             currentSet += 1
                         }
-                        
+
                         isMatchComplete = false
                     },
                     onReturn: {
@@ -670,19 +709,34 @@ struct ContentView: View {
                 )
             } else {
                 // Active match view
-                HStack(spacing: 12) {
-                    Text(player1Points)
-                        .largeScoreText()
-                        .foregroundColor(player1Color)
-                        .onTapGesture {
-                            updateScore("player1")
+                VStack(spacing: 4) {
+                    HStack(spacing: 12) {
+                        VStack(spacing: 2) {
+                            Text(player1Points)
+                                .largeScoreText()
+                                .foregroundColor(player1Color)
+                                .onTapGesture {
+                                    updateScore("player1")
+                                }
+
+                            Rectangle()
+                                .frame(height: 4)
+                                .foregroundColor(isPlayer1Serving ? player1Color : .clear)
                         }
-                    Text(player2Points)
-                        .largeScoreText()
-                        .foregroundColor(player2Color)
-                        .onTapGesture {
-                            updateScore("player2")
+
+                        VStack(spacing: 2) {
+                            Text(player2Points)
+                                .largeScoreText()
+                                .foregroundColor(player2Color)
+                                .onTapGesture {
+                                    updateScore("player2")
+                                }
+
+                            Rectangle()
+                                .frame(height: 4)
+                                .foregroundColor(!isPlayer1Serving ? player2Color : .clear)
                         }
+                    }
                 }
 
                 VStack(spacing: 12) {
@@ -701,16 +755,16 @@ struct ContentView: View {
                         VStack {
                             HStack(spacing: setsToPlay == 5 ? 12 : 16) {
                                 ForEach(0..<setsToShow, id: \.self) { setIndex in
-                                    FlipText(text: "\(player1SetScore[setIndex])", 
-                                           color: setIndex <= currentSet ? player1Color : .gray, 
+                                    FlipText(text: "\(player1SetScore[setIndex])",
+                                           color: setIndex <= currentSet ? player1Color : .gray,
                                            useSmallFont: true,
                                            opacity: setIndex <= currentSet ? 1.0 : 0.6)
                                 }
                             }
                             HStack(spacing: setsToPlay == 5 ? 12 : 16) {
                                 ForEach(0..<setsToShow, id: \.self) { setIndex in
-                                    FlipText(text: "\(player2SetScore[setIndex])", 
-                                           color: setIndex <= currentSet ? player2Color : .gray, 
+                                    FlipText(text: "\(player2SetScore[setIndex])",
+                                           color: setIndex <= currentSet ? player2Color : .gray,
                                            useSmallFont: true,
                                            opacity: setIndex <= currentSet ? 1.0 : 0.6)
                                 }
@@ -751,6 +805,7 @@ struct ContentView: View {
                 tieBreakRule: $tieBreakRule,
                 deuceType: $deuceType,
                 language: $language,
+                serverSetting: $serverSetting,
                 onReset: resetAllScores
             )
         }
@@ -784,6 +839,11 @@ struct ContentView: View {
         .onChange(of: tieBreakRule) { _, _ in saveSettings() }
         .onChange(of: deuceType) { _, _ in saveSettings() }
         .onChange(of: language) { _, _ in saveSettings() }
+        .onChange(of: serverSetting) { _, _ in
+            saveSettings()
+            // Update serving state when setting changes manually
+            isPlayer1Serving = (serverSetting == .player1)
+        }
     }
 }
 

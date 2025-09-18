@@ -18,6 +18,11 @@ enum DeuceType: String, CaseIterable {
     case long = "Long Deuce"
 }
 
+enum ServerSetting: String, CaseIterable {
+    case player1 = "Player 1"
+    case player2 = "Player 2"
+}
+
 enum Language: String, CaseIterable, Identifiable {
     case english = "en"
     case spanish = "es"
@@ -27,7 +32,7 @@ enum Language: String, CaseIterable, Identifiable {
     case portuguese = "pt"
     case chinese = "zh"
     case hindi = "hi"
-    
+
     var id: String { rawValue }
     
     var displayName: String {
@@ -64,6 +69,7 @@ struct LocalizedStrings {
                 "playerNames": "Player Names",
                 "language": "Language",
                 "deuceType": "Deuce Type",
+                "serverSetting": "Server",
                 "tapForOptions": "Tap for options",
                 "wins": "wins!"
             ],
@@ -84,6 +90,7 @@ struct LocalizedStrings {
                 "playerNames": "Nombres de Jugadores",
                 "language": "Idioma",
                 "deuceType": "Tipo de Deuce",
+                "serverSetting": "Servidor",
                 "tapForOptions": "Tocar para opciones",
                 "wins": "¡gana!"
             ],
@@ -104,6 +111,7 @@ struct LocalizedStrings {
                 "playerNames": "Noms des Joueurs",
                 "language": "Langue",
                 "deuceType": "Type de Deuce",
+                "serverSetting": "Serveur",
                 "tapForOptions": "Appuyer pour options",
                 "wins": "gagne!"
             ],
@@ -124,6 +132,7 @@ struct LocalizedStrings {
                 "playerNames": "Spielernamen",
                 "language": "Sprache",
                 "deuceType": "Deuce-Typ",
+                "serverSetting": "Aufschläger",
                 "tapForOptions": "Für Optionen tippen",
                 "wins": "gewinnt!"
             ],
@@ -144,6 +153,7 @@ struct LocalizedStrings {
                 "playerNames": "Nomi Giocatori",
                 "language": "Lingua",
                 "deuceType": "Tipo di Deuce",
+                "serverSetting": "Servizio",
                 "tapForOptions": "Tocca per opzioni",
                 "wins": "vince!"
             ],
@@ -164,6 +174,7 @@ struct LocalizedStrings {
                 "playerNames": "Nomes dos Jogadores",
                 "language": "Idioma",
                 "deuceType": "Tipo de Deuce",
+                "serverSetting": "Servidor",
                 "tapForOptions": "Toque para opções",
                 "wins": "vence!"
             ],
@@ -184,6 +195,7 @@ struct LocalizedStrings {
                 "playerNames": "选手姓名",
                 "language": "语言",
                 "deuceType": "平分类型",
+                "serverSetting": "发球方",
                 "tapForOptions": "点击查看选项",
                 "wins": "获胜！"
             ],
@@ -204,6 +216,7 @@ struct LocalizedStrings {
                 "playerNames": "खिलाड़ियों के नाम",
                 "language": "भाषा",
                 "deuceType": "ड्यूस प्रकार",
+                "serverSetting": "सर्वर",
                 "tapForOptions": "विकल्पों के लिए टैप करें",
                 "wins": "जीत गया!"
             ]
@@ -222,7 +235,8 @@ struct SettingsView: View {
     @Binding var tieBreakRule: TieBreakRule
     @Binding var deuceType: DeuceType
     @Binding var language: Language
-    
+    @Binding var serverSetting: ServerSetting
+
     let onReset: () -> Void
     @Environment(\.dismiss) private var dismiss
     
@@ -286,6 +300,28 @@ struct SettingsView: View {
                                         .foregroundColor(.primary)
                                     Spacer()
                                     if deuceType == type {
+                                        Image(systemName: "checkmark")
+                                            .foregroundColor(.blue)
+                                    }
+                                }
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                        }
+                    }
+                }
+
+                Section(LocalizedStrings.getString("serverSetting", language: language)) {
+                    VStack(spacing: 8) {
+                        ForEach(ServerSetting.allCases, id: \.self) { setting in
+                            Button(action: {
+                                serverSetting = setting
+                            }) {
+                                HStack {
+                                    Text(setting == .player1 ? player1Name : player2Name)
+                                        .font(.body)
+                                        .foregroundColor(.primary)
+                                    Spacer()
+                                    if serverSetting == setting {
                                         Image(systemName: "checkmark")
                                             .foregroundColor(.blue)
                                     }

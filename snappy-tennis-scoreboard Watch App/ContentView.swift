@@ -217,6 +217,7 @@ struct ContentView: View {
     @State private var deuceType = DeuceType.short
     @State private var language = Language.english
     @State private var serverSetting: ServerSetting = .player1
+    @State private var displayMode: DisplayMode = .static
 
     // Celebration
     @State private var showingCelebration = false
@@ -290,8 +291,17 @@ struct ContentView: View {
             serverSetting = .player1
         }
 
+        if let displayModeString = UserDefaults.standard.string(forKey: "displayMode"),
+           let mode = DisplayMode(rawValue: displayModeString) {
+            displayMode = mode
+        } else {
+            displayMode = .static
+        }
+
         // Sync serving state with server setting
-        isPlayer1Serving = (serverSetting == .player1)
+        if serverSetting != .off {
+            isPlayer1Serving = (serverSetting == .player1)
+        }
     }
 
     func saveSettings() {
@@ -304,11 +314,17 @@ struct ContentView: View {
         UserDefaults.standard.set(deuceType.rawValue, forKey: "deuceType")
         UserDefaults.standard.set(language.rawValue, forKey: "language")
         UserDefaults.standard.set(serverSetting.rawValue, forKey: "serverSetting")
+        UserDefaults.standard.set(displayMode.rawValue, forKey: "displayMode")
     }
 
     // Computed property for dynamic set display
     var setsToShow: Int {
         return setsToPlay  // Always show all sets for the match type
+    }
+
+    // When readable mode is active, swap scores so server is always on the left
+    var swapDisplay: Bool {
+        displayMode == .readable && serverSetting != .off && !isPlayer1Serving
     }
 
     func cycleScore(_ currentScore: String) -> String {
@@ -486,7 +502,7 @@ struct ContentView: View {
             tieBreakServeCount += 1
             if (tieBreakServeCount == 1) || (tieBreakServeCount > 1 && (tieBreakServeCount - 1) % 2 == 0) {
                 isPlayer1Serving.toggle()
-                serverSetting = isPlayer1Serving ? .player1 : .player2
+                if serverSetting != .off { serverSetting = isPlayer1Serving ? .player1 : .player2 }
             }
 
             if hasWonTieBreak(playerTieBreakPoints, opponentTieBreakPoints) {
@@ -511,7 +527,7 @@ struct ContentView: View {
                     // Reset tiebreak serve count and switch serve for next set
                     tieBreakServeCount = 0
                     isPlayer1Serving.toggle()
-                    serverSetting = isPlayer1Serving ? .player1 : .player2
+                    if serverSetting != .off { serverSetting = isPlayer1Serving ? .player1 : .player2 }
                 }
 
                 // Only force match completion if someone has won the required number of sets
@@ -527,7 +543,7 @@ struct ContentView: View {
                 gameWon = true
                 // Switch serve at end of game
                 isPlayer1Serving.toggle()
-                serverSetting = isPlayer1Serving ? .player1 : .player2
+                if serverSetting != .off { serverSetting = isPlayer1Serving ? .player1 : .player2 }
 
                 let opponentSetScore = isPlayer1 ? player2SetScore : player1SetScore
                 if hasWonSet(playerSetScore[currentSet], opponentSetScore[currentSet]) {
@@ -539,7 +555,7 @@ struct ContentView: View {
                         currentSet += 1
                         // Switch serve for new set (undo the game switch since set changes serving order)
                         isPlayer1Serving.toggle()
-                        serverSetting = isPlayer1Serving ? .player1 : .player2
+                        if serverSetting != .off { serverSetting = isPlayer1Serving ? .player1 : .player2 }
                     }
 
                     // Only force match completion if someone has won the required number of sets
@@ -711,60 +727,72 @@ struct ContentView: View {
                 // Active match view
                 VStack(spacing: 4) {
                     HStack(spacing: 12) {
+                        let leftPlayer = swapDisplay ? "player2" : "player1"
+                        let rightPlayer = swapDisplay ? "player1" : "player2"
+                        let leftPoints = swapDisplay ? player2Points : player1Points
+                        let rightPoints = swapDisplay ? player1Points : player2Points
+                        let leftColor = swapDisplay ? player2Color : player1Color
+                        let rightColor = swapDisplay ? player1Color : player2Color
+
                         VStack(spacing: 2) {
-                            Text(player1Points)
+                            Text(leftPoints)
                                 .largeScoreText()
-                                .foregroundColor(player1Color)
+                                .foregroundColor(leftColor)
                                 .onTapGesture {
-                                    updateScore("player1")
+                                    updateScore(leftPlayer)
                                 }
 
                             Rectangle()
                                 .frame(height: 4)
-                                .foregroundColor(isPlayer1Serving ? player1Color : .clear)
+                                .foregroundColor(serverSetting != .off && (swapDisplay ? !isPlayer1Serving : isPlayer1Serving) ? leftColor : .clear)
                         }
 
                         VStack(spacing: 2) {
-                            Text(player2Points)
+                            Text(rightPoints)
                                 .largeScoreText()
-                                .foregroundColor(player2Color)
+                                .foregroundColor(rightColor)
                                 .onTapGesture {
-                                    updateScore("player2")
+                                    updateScore(rightPlayer)
                                 }
 
                             Rectangle()
                                 .frame(height: 4)
-                                .foregroundColor(!isPlayer1Serving ? player2Color : .clear)
+                                .foregroundColor(serverSetting != .off && (swapDisplay ? isPlayer1Serving : !isPlayer1Serving) ? rightColor : .clear)
                         }
                     }
                 }
 
                 VStack(spacing: 12) {
+                    let leftSetScore = swapDisplay ? player2SetScore : player1SetScore
+                    let rightSetScore = swapDisplay ? player1SetScore : player2SetScore
+                    let leftSetColor = swapDisplay ? player2Color : player1Color
+                    let rightSetColor = swapDisplay ? player1Color : player2Color
+
                     if setsToPlay == 1 {
                         // Horizontal layout for single set
                         HStack(spacing: 8) {
-                            FlipText(text: "\(player1SetScore[0])", color: player1Color)
+                            FlipText(text: "\(leftSetScore[0])", color: leftSetColor)
                             Text("-")
                                 .mediumScoreText()
                                 .foregroundColor(.white)
                                 .opacity(0.6)
-                            FlipText(text: "\(player2SetScore[0])", color: player2Color)
+                            FlipText(text: "\(rightSetScore[0])", color: rightSetColor)
                         }
                     } else {
                         // Vertical layout for multiple sets
                         VStack {
                             HStack(spacing: setsToPlay == 5 ? 12 : 16) {
                                 ForEach(0..<setsToShow, id: \.self) { setIndex in
-                                    FlipText(text: "\(player1SetScore[setIndex])",
-                                           color: setIndex <= currentSet ? player1Color : .gray,
+                                    FlipText(text: "\(leftSetScore[setIndex])",
+                                           color: setIndex <= currentSet ? leftSetColor : .gray,
                                            useSmallFont: true,
                                            opacity: setIndex <= currentSet ? 1.0 : 0.6)
                                 }
                             }
                             HStack(spacing: setsToPlay == 5 ? 12 : 16) {
                                 ForEach(0..<setsToShow, id: \.self) { setIndex in
-                                    FlipText(text: "\(player2SetScore[setIndex])",
-                                           color: setIndex <= currentSet ? player2Color : .gray,
+                                    FlipText(text: "\(rightSetScore[setIndex])",
+                                           color: setIndex <= currentSet ? rightSetColor : .gray,
                                            useSmallFont: true,
                                            opacity: setIndex <= currentSet ? 1.0 : 0.6)
                                 }
@@ -806,6 +834,7 @@ struct ContentView: View {
                 deuceType: $deuceType,
                 language: $language,
                 serverSetting: $serverSetting,
+                displayMode: $displayMode,
                 onReset: resetAllScores
             )
         }
@@ -842,8 +871,11 @@ struct ContentView: View {
         .onChange(of: serverSetting) { _, _ in
             saveSettings()
             // Update serving state when setting changes manually
-            isPlayer1Serving = (serverSetting == .player1)
+            if serverSetting != .off {
+                isPlayer1Serving = (serverSetting == .player1)
+            }
         }
+        .onChange(of: displayMode) { _, _ in saveSettings() }
     }
 }
 

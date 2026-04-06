@@ -21,6 +21,12 @@ enum DeuceType: String, CaseIterable {
 enum ServerSetting: String, CaseIterable {
     case player1 = "Player 1"
     case player2 = "Player 2"
+    case off = "Off"
+}
+
+enum DisplayMode: String, CaseIterable {
+    case `static` = "Static"
+    case readable = "Readable"
 }
 
 enum Language: String, CaseIterable, Identifiable {
@@ -236,6 +242,7 @@ struct SettingsView: View {
     @Binding var deuceType: DeuceType
     @Binding var language: Language
     @Binding var serverSetting: ServerSetting
+    @Binding var displayMode: DisplayMode
 
     let onReset: () -> Void
     @Environment(\.dismiss) private var dismiss
@@ -317,7 +324,7 @@ struct SettingsView: View {
                                 serverSetting = setting
                             }) {
                                 HStack {
-                                    Text(setting == .player1 ? player1Name : player2Name)
+                                    Text(setting == .player1 ? player1Name : setting == .player2 ? player2Name : "Off")
                                         .font(.body)
                                         .foregroundColor(.primary)
                                     Spacer()
@@ -331,7 +338,31 @@ struct SettingsView: View {
                         }
                     }
                 }
-                
+
+                if serverSetting != .off {
+                    Section("Display Mode") {
+                        VStack(spacing: 8) {
+                            ForEach(DisplayMode.allCases, id: \.self) { mode in
+                                Button(action: {
+                                    displayMode = mode
+                                }) {
+                                    HStack {
+                                        Text(mode.rawValue)
+                                            .font(.body)
+                                            .foregroundColor(.primary)
+                                        Spacer()
+                                        if displayMode == mode {
+                                            Image(systemName: "checkmark")
+                                                .foregroundColor(.blue)
+                                        }
+                                    }
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                            }
+                        }
+                    }
+                }
+
                 Section {
                     Button(action: {
                         onReset()

@@ -218,6 +218,12 @@ struct ContentView: View {
     @State private var language = Language.english
     @State private var serverSetting: ServerSetting = .player1
     @State private var displayMode: DisplayMode = .static
+    @State private var gameMode: GameMode = .game
+
+    // Practice mode
+    @State private var player1PracticeScore = 0
+    @State private var player2PracticeScore = 0
+    @State private var practiceHistory: [(Int, Int)] = []
 
     // Celebration
     @State private var showingCelebration = false
@@ -298,6 +304,13 @@ struct ContentView: View {
             displayMode = .static
         }
 
+        if let gameModeString = UserDefaults.standard.string(forKey: "gameMode"),
+           let mode = GameMode(rawValue: gameModeString) {
+            gameMode = mode
+        } else {
+            gameMode = .game
+        }
+
         // Sync serving state with server setting
         if serverSetting != .off {
             isPlayer1Serving = (serverSetting == .player1)
@@ -315,6 +328,7 @@ struct ContentView: View {
         UserDefaults.standard.set(language.rawValue, forKey: "language")
         UserDefaults.standard.set(serverSetting.rawValue, forKey: "serverSetting")
         UserDefaults.standard.set(displayMode.rawValue, forKey: "displayMode")
+        UserDefaults.standard.set(gameMode.rawValue, forKey: "gameMode")
     }
 
     // Computed property for dynamic set display
@@ -468,6 +482,33 @@ struct ContentView: View {
         matchWinner = ""
         isPlayer1Serving = (serverSetting == .player1)
         tieBreakServeCount = 0
+        player1PracticeScore = 0
+        player2PracticeScore = 0
+        practiceHistory.removeAll()
+    }
+
+    func updatePracticeScore(_ player: String) {
+        practiceHistory.append((player1PracticeScore, player2PracticeScore))
+        if player == "player1" {
+            player1PracticeScore = player1PracticeScore >= 99 ? 0 : player1PracticeScore + 1
+        } else {
+            player2PracticeScore = player2PracticeScore >= 99 ? 0 : player2PracticeScore + 1
+        }
+    }
+
+    func undoPracticeChange() {
+        guard !practiceHistory.isEmpty else { return }
+        let prev = practiceHistory.removeLast()
+        player1PracticeScore = prev.0
+        player2PracticeScore = prev.1
+    }
+
+    var player1PracticeDisplay: String {
+        player1PracticeScore >= 10 ? "\(player1PracticeScore)" : "0\(player1PracticeScore)"
+    }
+
+    var player2PracticeDisplay: String {
+        player2PracticeScore >= 10 ? "\(player2PracticeScore)" : "0\(player2PracticeScore)"
     }
 
     func isTieBreak() -> Bool {
@@ -676,7 +717,56 @@ struct ContentView: View {
 
     var body: some View {
         VStack(spacing: 12) {
-            if isMatchComplete {
+            if gameMode == .practice {
+                VStack(spacing: 4) {
+                    HStack(spacing: 12) {
+                        VStack(spacing: 2) {
+                            Text(player1PracticeDisplay)
+                                .largeScoreText()
+                                .foregroundColor(player1Color)
+                                .onTapGesture {
+                                    updatePracticeScore("player1")
+                                }
+                            Rectangle()
+                                .frame(height: 4)
+                                .foregroundColor(.clear)
+                        }
+                        VStack(spacing: 2) {
+                            Text(player2PracticeDisplay)
+                                .largeScoreText()
+                                .foregroundColor(player2Color)
+                                .onTapGesture {
+                                    updatePracticeScore("player2")
+                                }
+                            Rectangle()
+                                .frame(height: 4)
+                                .foregroundColor(.clear)
+                        }
+                    }
+                }
+                VStack(spacing: 12) {
+                    HStack(spacing: 80) {
+                        Button(action: {
+                            undoPracticeChange()
+                        }) {
+                            Image(systemName: "arrow.uturn.backward")
+                                .foregroundColor(.white)
+                                .opacity(0.8)
+                                .padding(8)
+                        }
+                        .buttonStyle(TransparentButtonStyle())
+                        Button(action: {
+                            showingSettings = true
+                        }) {
+                            Image(systemName: "gearshape")
+                                .foregroundColor(.white)
+                                .opacity(0.8)
+                                .padding(8)
+                        }
+                        .buttonStyle(TransparentButtonStyle())
+                    }
+                }
+            } else if isMatchComplete {
                 GameResultView(
                     player1SetScore: player1SetScore,
                     player2SetScore: player2SetScore,
@@ -835,6 +925,7 @@ struct ContentView: View {
                 language: $language,
                 serverSetting: $serverSetting,
                 displayMode: $displayMode,
+                gameMode: $gameMode,
                 onReset: resetAllScores
             )
         }
@@ -876,6 +967,10 @@ struct ContentView: View {
             }
         }
         .onChange(of: displayMode) { _, _ in saveSettings() }
+        .onChange(of: gameMode) { _, newValue in
+            saveSettings()
+            if newValue == .practice { isMatchComplete = false }
+        }
     }
 }
 

@@ -29,6 +29,11 @@ enum DisplayMode: String, CaseIterable {
     case readable = "Readable"
 }
 
+enum GameMode: String, CaseIterable {
+    case game = "Game"
+    case practice = "Practice"
+}
+
 enum Language: String, CaseIterable, Identifiable {
     case english = "en"
     case spanish = "es"
@@ -243,6 +248,7 @@ struct SettingsView: View {
     @Binding var language: Language
     @Binding var serverSetting: ServerSetting
     @Binding var displayMode: DisplayMode
+    @Binding var gameMode: GameMode
 
     let onReset: () -> Void
     @Environment(\.dismiss) private var dismiss
@@ -252,6 +258,29 @@ struct SettingsView: View {
     var body: some View {
         NavigationView {
             List {
+                Section("Game Mode") {
+                    HStack(spacing: 12) {
+                        ForEach(GameMode.allCases, id: \.self) { mode in
+                            Button(action: {
+                                gameMode = mode
+                            }) {
+                                Text(mode.rawValue)
+                                    .font(.body)
+                                    .fontWeight(gameMode == mode ? .bold : .regular)
+                                    .foregroundColor(gameMode == mode ? .white : .secondary)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .fill(gameMode == mode ? Color.blue : Color.clear)
+                                    )
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                        }
+                    }
+                }
+
+                if gameMode == .game {
                 Section(LocalizedStrings.getString("numberOfSets", language: language)) {
                         HStack(spacing: 12) {
                             ForEach([1, 3, 5], id: \.self) { setCount in
@@ -362,6 +391,7 @@ struct SettingsView: View {
                         }
                     }
                 }
+                } // end if gameMode == .game
 
                 Section {
                     Button(action: {

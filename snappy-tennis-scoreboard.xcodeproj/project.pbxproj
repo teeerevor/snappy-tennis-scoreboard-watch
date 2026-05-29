@@ -7,17 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		46362E762E489FEF004C021A /* snappy-tennis-scoreboard-watch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 46362E752E489FEF004C021A /* snappy-tennis-scoreboard-watch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A8BB81F42FC98A25004A594F /* snappy-tennis-scoreboard-watch.app in CopyFiles */ = {isa = PBXBuildFile; fileRef = 46362E752E489FEF004C021A /* snappy-tennis-scoreboard-watch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		46362E772E489FEF004C021A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 46362E692E489FEF004C021A /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 46362E742E489FEF004C021A;
-			remoteInfo = "snappy-tennis-scoreboard Watch App";
-		};
 		46362E852E489FF0004C021A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 46362E692E489FEF004C021A /* Project object */;
@@ -32,28 +25,44 @@
 			remoteGlobalIDString = 46362E742E489FEF004C021A;
 			remoteInfo = "snappy-tennis-scoreboard Watch App";
 		};
+		A8BB81F12FC989A9004A594F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 46362E692E489FEF004C021A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 46362E742E489FEF004C021A;
+			remoteInfo = "snappy-tennis-scoreboard Watch App";
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		46362E9B2E489FF0004C021A /* Embed Watch Content */ = {
+		A8BB81F32FC989F0004A594F /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
-			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
-			dstSubfolderSpec = 16;
+			dstPath = Watch;
+			dstSubfolderSpec = 1;
 			files = (
-				46362E762E489FEF004C021A /* snappy-tennis-scoreboard-watch.app in Embed Watch Content */,
+				A8BB81F42FC98A25004A594F /* snappy-tennis-scoreboard-watch.app in CopyFiles */,
 			);
-			name = "Embed Watch Content";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		46362E6F2E489FEF004C021A /* snappy-tennis-scoreboard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "snappy-tennis-scoreboard.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		46362E752E489FEF004C021A /* snappy-tennis-scoreboard-watch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "snappy-tennis-scoreboard-watch.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		46362E842E489FF0004C021A /* snappy-tennis-scoreboard Watch AppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "snappy-tennis-scoreboard Watch AppTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		46362E8E2E489FF0004C021A /* snappy-tennis-scoreboard Watch AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "snappy-tennis-scoreboard Watch AppUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A8AFBAF72FC82E1E00A9BD2D /* Snappy Tennis Scoreboard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Snappy Tennis Scoreboard.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		A8AFBB032FC8340B00A9BD2D /* Exceptions for "Snappy Tennis Scoreboard" folder in "Snappy Tennis Scoreboard" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"Snappy-Tennis-Scoreboard-Info.plist",
+			);
+			target = A8AFBAF62FC82E1E00A9BD2D /* Snappy Tennis Scoreboard */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		46362E792E489FEF004C021A /* snappy-tennis-scoreboard Watch App */ = {
@@ -69,6 +78,14 @@
 		46362E912E489FF0004C021A /* snappy-tennis-scoreboard Watch AppUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = "snappy-tennis-scoreboard Watch AppUITests";
+			sourceTree = "<group>";
+		};
+		A8AFBAF82FC82E1E00A9BD2D /* Snappy Tennis Scoreboard */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				A8AFBB032FC8340B00A9BD2D /* Exceptions for "Snappy Tennis Scoreboard" folder in "Snappy Tennis Scoreboard" target */,
+			);
+			path = "Snappy Tennis Scoreboard";
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -95,6 +112,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A8AFBAF42FC82E1E00A9BD2D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -104,6 +128,7 @@
 				46362E792E489FEF004C021A /* snappy-tennis-scoreboard Watch App */,
 				46362E872E489FF0004C021A /* snappy-tennis-scoreboard Watch AppTests */,
 				46362E912E489FF0004C021A /* snappy-tennis-scoreboard Watch AppUITests */,
+				A8AFBAF82FC82E1E00A9BD2D /* Snappy Tennis Scoreboard */,
 				46362E702E489FEF004C021A /* Products */,
 			);
 			sourceTree = "<group>";
@@ -111,10 +136,10 @@
 		46362E702E489FEF004C021A /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				46362E6F2E489FEF004C021A /* snappy-tennis-scoreboard.app */,
 				46362E752E489FEF004C021A /* snappy-tennis-scoreboard-watch.app */,
 				46362E842E489FF0004C021A /* snappy-tennis-scoreboard Watch AppTests.xctest */,
 				46362E8E2E489FF0004C021A /* snappy-tennis-scoreboard Watch AppUITests.xctest */,
+				A8AFBAF72FC82E1E00A9BD2D /* Snappy Tennis Scoreboard.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -122,25 +147,6 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		46362E6E2E489FEF004C021A /* snappy-tennis-scoreboard */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 46362E9C2E489FF0004C021A /* Build configuration list for PBXNativeTarget "snappy-tennis-scoreboard" */;
-			buildPhases = (
-				46362E6D2E489FEF004C021A /* Resources */,
-				46362E9B2E489FF0004C021A /* Embed Watch Content */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				46362E782E489FEF004C021A /* PBXTargetDependency */,
-			);
-			name = "snappy-tennis-scoreboard";
-			packageProductDependencies = (
-			);
-			productName = "snappy-tennis-scoreboard";
-			productReference = 46362E6F2E489FEF004C021A /* snappy-tennis-scoreboard.app */;
-			productType = "com.apple.product-type.application.watchapp2-container";
-		};
 		46362E742E489FEF004C021A /* snappy-tennis-scoreboard Watch App */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 46362E982E489FF0004C021A /* Build configuration list for PBXNativeTarget "snappy-tennis-scoreboard Watch App" */;
@@ -209,6 +215,30 @@
 			productReference = 46362E8E2E489FF0004C021A /* snappy-tennis-scoreboard Watch AppUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		A8AFBAF62FC82E1E00A9BD2D /* Snappy Tennis Scoreboard */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A8AFBAFF2FC82E1F00A9BD2D /* Build configuration list for PBXNativeTarget "Snappy Tennis Scoreboard" */;
+			buildPhases = (
+				A8AFBAF32FC82E1E00A9BD2D /* Sources */,
+				A8AFBAF42FC82E1E00A9BD2D /* Frameworks */,
+				A8AFBAF52FC82E1E00A9BD2D /* Resources */,
+				A8BB81F32FC989F0004A594F /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A8BB81F22FC989A9004A594F /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				A8AFBAF82FC82E1E00A9BD2D /* Snappy Tennis Scoreboard */,
+			);
+			name = "Snappy Tennis Scoreboard";
+			packageProductDependencies = (
+			);
+			productName = "Snappy Tennis Scoreboard";
+			productReference = A8AFBAF72FC82E1E00A9BD2D /* Snappy Tennis Scoreboard.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -216,12 +246,9 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1640;
-				LastUpgradeCheck = 1640;
+				LastSwiftUpdateCheck = 2650;
+				LastUpgradeCheck = 2650;
 				TargetAttributes = {
-					46362E6E2E489FEF004C021A = {
-						CreatedOnToolsVersion = 16.4;
-					};
 					46362E742E489FEF004C021A = {
 						CreatedOnToolsVersion = 16.4;
 					};
@@ -232,6 +259,9 @@
 					46362E8D2E489FF0004C021A = {
 						CreatedOnToolsVersion = 16.4;
 						TestTargetID = 46362E742E489FEF004C021A;
+					};
+					A8AFBAF62FC82E1E00A9BD2D = {
+						CreatedOnToolsVersion = 26.5;
 					};
 				};
 			};
@@ -249,22 +279,15 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				46362E6E2E489FEF004C021A /* snappy-tennis-scoreboard */,
 				46362E742E489FEF004C021A /* snappy-tennis-scoreboard Watch App */,
 				46362E832E489FF0004C021A /* snappy-tennis-scoreboard Watch AppTests */,
 				46362E8D2E489FF0004C021A /* snappy-tennis-scoreboard Watch AppUITests */,
+				A8AFBAF62FC82E1E00A9BD2D /* Snappy Tennis Scoreboard */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		46362E6D2E489FEF004C021A /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		46362E732E489FEF004C021A /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -280,6 +303,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		46362E8C2E489FF0004C021A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A8AFBAF52FC82E1E00A9BD2D /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -310,14 +340,16 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A8AFBAF32FC82E1E00A9BD2D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		46362E782E489FEF004C021A /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 46362E742E489FEF004C021A /* snappy-tennis-scoreboard Watch App */;
-			targetProxy = 46362E772E489FEF004C021A /* PBXContainerItemProxy */;
-		};
 		46362E862E489FF0004C021A /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 46362E742E489FEF004C021A /* snappy-tennis-scoreboard Watch App */;
@@ -327,6 +359,11 @@
 			isa = PBXTargetDependency;
 			target = 46362E742E489FEF004C021A /* snappy-tennis-scoreboard Watch App */;
 			targetProxy = 46362E8F2E489FF0004C021A /* PBXContainerItemProxy */;
+		};
+		A8BB81F22FC989A9004A594F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 46362E742E489FEF004C021A /* snappy-tennis-scoreboard Watch App */;
+			targetProxy = A8BB81F12FC989A9004A594F /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -365,6 +402,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = ULH45YJ22R;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -388,6 +426,7 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -427,6 +466,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = ULH45YJ22R;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -443,6 +483,7 @@
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 			};
 			name = Release;
@@ -464,7 +505,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.4;
 				PRODUCT_BUNDLE_IDENTIFIER = "app.snappysports.tennis-scoreboard.watchkitapp";
 				PRODUCT_NAME = "snappy-tennis-scoreboard-watch";
 				SDKROOT = watchos;
@@ -493,7 +534,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.4;
 				PRODUCT_BUNDLE_IDENTIFIER = "app.snappysports.tennis-scoreboard.watchkitapp";
 				PRODUCT_NAME = "snappy-tennis-scoreboard-watch";
 				SDKROOT = watchos;
@@ -503,41 +544,6 @@
 				TARGETED_DEVICE_FAMILY = 4;
 				VALIDATE_PRODUCT = YES;
 				WATCHOS_DEPLOYMENT_TARGET = 11.5;
-			};
-			name = Release;
-		};
-		46362E9D2E489FF0004C021A /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = ULH45YJ22R;
-				INFOPLIST_KEY_CFBundleDisplayName = "snappy-tennis-scoreboard";
-				MARKETING_VERSION = 1.3;
-				PRODUCT_BUNDLE_IDENTIFIER = "app.snappysports.tennis-scoreboard";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
-				SDKROOT = iphoneos;
-				SWIFT_VERSION = 5.0;
-			};
-			name = Debug;
-		};
-		46362E9E2E489FF0004C021A /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = ULH45YJ22R;
-				INFOPLIST_KEY_CFBundleDisplayName = "snappy-tennis-scoreboard";
-				MARKETING_VERSION = 1.3;
-				PRODUCT_BUNDLE_IDENTIFIER = "app.snappysports.tennis-scoreboard";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
-				SDKROOT = iphoneos;
-				SWIFT_VERSION = 5.0;
-				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
@@ -621,6 +627,85 @@
 			};
 			name = Release;
 		};
+		A8AFBB002FC82E1F00A9BD2D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = ULH45YJ22R;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Snappy-Tennis-Scoreboard-Info.plist";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.4;
+				PRODUCT_BUNDLE_IDENTIFIER = "app.snappysports.tennis-scoreboard";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		A8AFBB012FC82E1F00A9BD2D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = ULH45YJ22R;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Snappy-Tennis-Scoreboard-Info.plist";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.4;
+				PRODUCT_BUNDLE_IDENTIFIER = "app.snappysports.tennis-scoreboard";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -642,15 +727,6 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		46362E9C2E489FF0004C021A /* Build configuration list for PBXNativeTarget "snappy-tennis-scoreboard" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				46362E9D2E489FF0004C021A /* Debug */,
-				46362E9E2E489FF0004C021A /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		46362E9F2E489FF0004C021A /* Build configuration list for PBXNativeTarget "snappy-tennis-scoreboard Watch AppTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -665,6 +741,15 @@
 			buildConfigurations = (
 				46362EA32E489FF0004C021A /* Debug */,
 				46362EA42E489FF0004C021A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A8AFBAFF2FC82E1F00A9BD2D /* Build configuration list for PBXNativeTarget "Snappy Tennis Scoreboard" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A8AFBB002FC82E1F00A9BD2D /* Debug */,
+				A8AFBB012FC82E1F00A9BD2D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

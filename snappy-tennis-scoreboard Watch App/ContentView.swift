@@ -859,7 +859,7 @@ struct ContentView: View {
                     let rightSetColor = swapDisplay ? player1Color : player2Color
 
                     if setsToPlay == 1 {
-                        // Horizontal layout for single set
+                        // Horizontal layout for single set — swap follows server in readable mode
                         HStack(spacing: 8) {
                             FlipText(text: "\(leftSetScore[0])", color: leftSetColor)
                             Text("-")
@@ -869,20 +869,20 @@ struct ContentView: View {
                             FlipText(text: "\(rightSetScore[0])", color: rightSetColor)
                         }
                     } else {
-                        // Vertical layout for multiple sets
+                        // Vertical layout — top row always player1, bottom always player2
                         VStack {
                             HStack(spacing: setsToPlay == 5 ? 12 : 16) {
                                 ForEach(0..<setsToShow, id: \.self) { setIndex in
-                                    FlipText(text: "\(leftSetScore[setIndex])",
-                                           color: setIndex <= currentSet ? leftSetColor : .gray,
+                                    FlipText(text: "\(player1SetScore[setIndex])",
+                                           color: setIndex <= currentSet ? player1Color : .gray,
                                            useSmallFont: true,
                                            opacity: setIndex <= currentSet ? 1.0 : 0.6)
                                 }
                             }
                             HStack(spacing: setsToPlay == 5 ? 12 : 16) {
                                 ForEach(0..<setsToShow, id: \.self) { setIndex in
-                                    FlipText(text: "\(rightSetScore[setIndex])",
-                                           color: setIndex <= currentSet ? rightSetColor : .gray,
+                                    FlipText(text: "\(player2SetScore[setIndex])",
+                                           color: setIndex <= currentSet ? player2Color : .gray,
                                            useSmallFont: true,
                                            opacity: setIndex <= currentSet ? 1.0 : 0.6)
                                 }

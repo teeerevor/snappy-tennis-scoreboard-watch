@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		A8BB81F42FC98A25004A594F /* snappy-tennis-scoreboard-watch.app in CopyFiles */ = {isa = PBXBuildFile; fileRef = 46362E752E489FEF004C021A /* snappy-tennis-scoreboard-watch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A8CC00012FD0000000000001 /* TennisScoring in Frameworks */ = {isa = PBXBuildFile; productRef = A8CC00022FD0000000000002 /* TennisScoring */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -95,6 +96,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A8CC00012FD0000000000001 /* TennisScoring in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -164,6 +166,7 @@
 			);
 			name = "snappy-tennis-scoreboard Watch App";
 			packageProductDependencies = (
+				A8CC00022FD0000000000002 /* TennisScoring */,
 			);
 			productName = "snappy-tennis-scoreboard Watch App";
 			productReference = 46362E752E489FEF004C021A /* snappy-tennis-scoreboard-watch.app */;
@@ -274,6 +277,9 @@
 			);
 			mainGroup = 46362E682E489FEF004C021A;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				A8CC00032FD0000000000003 /* XCLocalSwiftPackageReference "Packages/TennisScoring" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 46362E702E489FEF004C021A /* Products */;
 			projectDirPath = "";
@@ -562,7 +568,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/snappy-tennis-scoreboard Watch App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/snappy-tennis-scoreboard Watch App";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/snappy-tennis-scoreboard-watch.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/snappy-tennis-scoreboard-watch";
 				WATCHOS_DEPLOYMENT_TARGET = 11.5;
 			};
 			name = Debug;
@@ -582,7 +588,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/snappy-tennis-scoreboard Watch App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/snappy-tennis-scoreboard Watch App";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/snappy-tennis-scoreboard-watch.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/snappy-tennis-scoreboard-watch";
 				VALIDATE_PRODUCT = YES;
 				WATCHOS_DEPLOYMENT_TARGET = 11.5;
 			};
@@ -755,6 +761,20 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		A8CC00032FD0000000000003 /* XCLocalSwiftPackageReference "Packages/TennisScoring" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/TennisScoring;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		A8CC00022FD0000000000002 /* TennisScoring */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = TennisScoring;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 46362E692E489FEF004C021A /* Project object */;
 }

@@ -66,6 +66,7 @@ struct GameAnnouncementView: View {
                     .foregroundColor(.white)
                     .opacity(wordOpacity)
                     .offset(y: wordOffset - 20)
+                    .accessibilityIdentifier("celebration")
             }
         }
         .onAppear {
@@ -96,6 +97,11 @@ struct GameAnnouncementView: View {
             wordOffset = 0
         }
         
+        // UI screenshot tests keep the first word on screen so it can be captured
+        if ProcessInfo.processInfo.arguments.contains("-holdCelebration") {
+            return
+        }
+
         // Hold for a moment, then fade out and show next word
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
             withAnimation(.easeIn(duration: 0.3)) {

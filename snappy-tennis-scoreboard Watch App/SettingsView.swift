@@ -6,17 +6,7 @@
 //
 
 import SwiftUI
-
-enum TieBreakRule: String, CaseIterable {
-    case at66 = "6-6"
-    case at55 = "5-5"
-    case none = "None"
-}
-
-enum DeuceType: String, CaseIterable {
-    case short = "Short Deuce"
-    case long = "Long Deuce"
-}
+import TennisScoring
 
 enum ServerSetting: String, CaseIterable {
     case player1 = "Player 1"
@@ -29,8 +19,8 @@ enum DisplayMode: String, CaseIterable {
     case readable = "Readable"
 }
 
-enum GameMode: String, CaseIterable {
-    case game = "Game"
+enum PlayMode: String, CaseIterable {
+    case match = "Match"
     case practice = "Practice"
 }
 
@@ -72,8 +62,13 @@ struct LocalizedStrings {
                 "color": "Color",
                 "colour": "Color",
                 "playOn": "Play On",
-                "newGame": "New Game",
-                "reset": "Reset Scores",
+                "newMatch": "New Match",
+                "start": "Start",
+                "sides": "Sides",
+                "serves": "serves",
+                "trackServe": "Track serve",
+                "server": "Server",
+                "receiver": "Receiver",
                 "settings": "Settings",
                 "numberOfSets": "Number of Sets",
                 "tieBreakRule": "Tie-Break Rule",
@@ -93,8 +88,13 @@ struct LocalizedStrings {
                 "color": "Color",
                 "colour": "Color",
                 "playOn": "Continuar",
-                "newGame": "Nuevo Juego",
-                "reset": "Reiniciar Puntuación",
+                "newMatch": "Nuevo Partido",
+                "start": "Empezar",
+                "sides": "Lados",
+                "serves": "saca",
+                "trackServe": "Seguir el saque",
+                "server": "Sacador",
+                "receiver": "Restador",
                 "settings": "Configuración",
                 "numberOfSets": "Número de Sets",
                 "tieBreakRule": "Regla de Tie-Break",
@@ -114,8 +114,13 @@ struct LocalizedStrings {
                 "color": "Couleur",
                 "colour": "Couleur",
                 "playOn": "Continuer",
-                "newGame": "Nouveau Jeu",
-                "reset": "Réinitialiser Scores",
+                "newMatch": "Nouveau Match",
+                "start": "Commencer",
+                "sides": "Côtés",
+                "serves": "sert",
+                "trackServe": "Suivre le service",
+                "server": "Serveur",
+                "receiver": "Relanceur",
                 "settings": "Paramètres",
                 "numberOfSets": "Nombre de Sets",
                 "tieBreakRule": "Règle de Tie-Break",
@@ -135,8 +140,13 @@ struct LocalizedStrings {
                 "color": "Farbe",
                 "colour": "Farbe",
                 "playOn": "Weiterspielen",
-                "newGame": "Neues Spiel",
-                "reset": "Punkte Zurücksetzen",
+                "newMatch": "Neues Match",
+                "start": "Starten",
+                "sides": "Seiten",
+                "serves": "schlägt auf",
+                "trackServe": "Aufschlag verfolgen",
+                "server": "Aufschläger",
+                "receiver": "Rückschläger",
                 "settings": "Einstellungen",
                 "numberOfSets": "Anzahl der Sätze",
                 "tieBreakRule": "Tie-Break-Regel",
@@ -156,8 +166,13 @@ struct LocalizedStrings {
                 "color": "Colore",
                 "colour": "Colore",
                 "playOn": "Continuare",
-                "newGame": "Nuova Partita",
-                "reset": "Azzera Punteggi",
+                "newMatch": "Nuova Partita",
+                "start": "Inizia",
+                "sides": "Lati",
+                "serves": "serve",
+                "trackServe": "Segna il servizio",
+                "server": "Battitore",
+                "receiver": "Ribattitore",
                 "settings": "Impostazioni",
                 "numberOfSets": "Numero di Set",
                 "tieBreakRule": "Regola del Tie-Break",
@@ -177,8 +192,13 @@ struct LocalizedStrings {
                 "color": "Cor",
                 "colour": "Cor",
                 "playOn": "Continuar",
-                "newGame": "Novo Jogo",
-                "reset": "Reiniciar Pontuação",
+                "newMatch": "Nova Partida",
+                "start": "Começar",
+                "sides": "Lados",
+                "serves": "saca",
+                "trackServe": "Controlar o saque",
+                "server": "Sacador",
+                "receiver": "Recetor",
                 "settings": "Configurações",
                 "numberOfSets": "Número de Sets",
                 "tieBreakRule": "Regra do Tie-Break",
@@ -198,8 +218,13 @@ struct LocalizedStrings {
                 "color": "颜色",
                 "colour": "颜色",
                 "playOn": "继续比赛",
-                "newGame": "新比赛",
-                "reset": "重置比分",
+                "newMatch": "新比赛",
+                "start": "开始",
+                "sides": "场地",
+                "serves": "发球",
+                "trackServe": "记录发球",
+                "server": "发球方",
+                "receiver": "接发球方",
                 "settings": "设置",
                 "numberOfSets": "盘数",
                 "tieBreakRule": "抢七规则",
@@ -219,8 +244,13 @@ struct LocalizedStrings {
                 "color": "रंग",
                 "colour": "रंग",
                 "playOn": "जारी रखें",
-                "newGame": "नया गेम",
-                "reset": "स्कोर रीसेट करें",
+                "newMatch": "नया मैच",
+                "start": "शुरू करें",
+                "sides": "साइड",
+                "serves": "सर्व करेगा",
+                "trackServe": "सर्व ट्रैक करें",
+                "server": "सर्वर",
+                "receiver": "रिसीवर",
                 "settings": "सेटिंग्स",
                 "numberOfSets": "सेटों की संख्या",
                 "tieBreakRule": "टाई-ब्रेक नियम",
@@ -246,33 +276,64 @@ struct SettingsView: View {
     @Binding var tieBreakRule: TieBreakRule
     @Binding var deuceType: DeuceType
     @Binding var language: Language
-    @Binding var serverSetting: ServerSetting
     @Binding var displayMode: DisplayMode
-    @Binding var gameMode: GameMode
+    @Binding var playMode: PlayMode
 
-    let onReset: () -> Void
+    @Binding var tracksServe: Bool
+
+    // Changed only by starting a New Match (or turning serve tracking on/off)
+    let serverSetting: ServerSetting
+    let player1OnLeft: Bool
+    let onNewMatch: (ServerSetting, Bool) -> Void
+
     @Environment(\.dismiss) private var dismiss
-    
+
     let colorOptions: [Color] = [ .red, .orange, .yellow, .green, .blue, .purple, .pink, .cyan, .mint, .indigo]
-    
+
     var body: some View {
-        NavigationView {
+        NavigationStack {
             List {
-                Section("Game Mode") {
+                Section {
+                    NavigationLink {
+                        NewMatchView(
+                            player1Name: player1Name,
+                            player2Name: player2Name,
+                            player1Color: player1Color,
+                            player2Color: player2Color,
+                            playMode: playMode,
+                            language: language,
+                            serverSetting: serverSetting,
+                            player1OnLeft: player1OnLeft,
+                            onStart: { server, onLeft in
+                                onNewMatch(server, onLeft)
+                                dismiss()
+                            }
+                        )
+                    } label: {
+                        HStack {
+                            Image(systemName: "arrow.clockwise")
+                            Text(LocalizedStrings.getString("newMatch", language: language))
+                        }
+                        .foregroundColor(.blue)
+                    }
+                    .accessibilityIdentifier("button.newMatch")
+                }
+
+                Section("Mode") {
                     HStack(spacing: 12) {
-                        ForEach(GameMode.allCases, id: \.self) { mode in
+                        ForEach(PlayMode.allCases, id: \.self) { mode in
                             Button(action: {
-                                gameMode = mode
+                                playMode = mode
                             }) {
                                 Text(mode.rawValue)
                                     .font(.body)
-                                    .fontWeight(gameMode == mode ? .bold : .regular)
-                                    .foregroundColor(gameMode == mode ? .white : .secondary)
+                                    .fontWeight(playMode == mode ? .bold : .regular)
+                                    .foregroundColor(playMode == mode ? .white : .secondary)
                                     .padding(.horizontal, 8)
                                     .padding(.vertical, 4)
                                     .background(
                                         RoundedRectangle(cornerRadius: 8)
-                                            .fill(gameMode == mode ? Color.blue : Color.clear)
+                                            .fill(playMode == mode ? Color.blue : Color.clear)
                                     )
                             }
                             .buttonStyle(PlainButtonStyle())
@@ -280,7 +341,7 @@ struct SettingsView: View {
                     }
                 }
 
-                if gameMode == .game {
+                if playMode == .match {
                 Section(LocalizedStrings.getString("numberOfSets", language: language)) {
                         HStack(spacing: 12) {
                             ForEach([1, 3, 5], id: \.self) { setCount in
@@ -347,25 +408,8 @@ struct SettingsView: View {
                 }
 
                 Section(LocalizedStrings.getString("serverSetting", language: language)) {
-                    VStack(spacing: 8) {
-                        ForEach(ServerSetting.allCases, id: \.self) { setting in
-                            Button(action: {
-                                serverSetting = setting
-                            }) {
-                                HStack {
-                                    Text(setting == .player1 ? player1Name : setting == .player2 ? player2Name : "Off")
-                                        .font(.body)
-                                        .foregroundColor(.primary)
-                                    Spacer()
-                                    if serverSetting == setting {
-                                        Image(systemName: "checkmark")
-                                            .foregroundColor(.blue)
-                                    }
-                                }
-                            }
-                            .buttonStyle(PlainButtonStyle())
-                        }
-                    }
+                    Toggle(LocalizedStrings.getString("trackServe", language: language), isOn: $tracksServe)
+                        .accessibilityIdentifier("settings.trackServe")
                 }
 
                 if serverSetting != .off {
@@ -391,21 +435,8 @@ struct SettingsView: View {
                         }
                     }
                 }
-                } // end if gameMode == .game
+                } // end if playMode == .match
 
-                Section {
-                    Button(action: {
-                        onReset()
-                        dismiss()
-                    }) {
-                        HStack {
-                            Image(systemName: "arrow.clockwise")
-                            Text(LocalizedStrings.getString("reset", language: language))
-                        }
-                        .foregroundColor(.red)
-                    }
-                }
-                
                 Section("\(player1Name) \(LocalizedStrings.getString("colour", language: language))") {
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 5), spacing: 8) {
                         ForEach(colorOptions, id: \.self) { color in

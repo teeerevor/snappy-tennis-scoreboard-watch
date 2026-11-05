@@ -142,6 +142,7 @@ struct GameResultView: View {
                     .font(.caption)
                     .foregroundColor(.white)
                     .opacity(0.6)
+                    .accessibilityIdentifier("result.tapForOptions")
             } else {
                 VStack(spacing: 12) {
                     VStack(spacing: 8) {
@@ -157,10 +158,11 @@ struct GameResultView: View {
                                     .cornerRadius(20)
                             }
                             .buttonStyle(PlainButtonStyle())
+                            .accessibilityIdentifier("button.playOn")
                         }
                         
                         Button(action: onReturn) {
-                            Text(LocalizedStrings.getString("newGame", language: language))
+                            Text(LocalizedStrings.getString("newMatch", language: language))
                                 .font(.body)
                                 .fontWeight(.medium)
                                 .foregroundColor(.white)
@@ -170,6 +172,7 @@ struct GameResultView: View {
                                 .cornerRadius(20)
                         }
                         .buttonStyle(PlainButtonStyle())
+                        .accessibilityIdentifier("button.return")
                     }
                     
                     HStack(spacing: 80) {
@@ -180,6 +183,7 @@ struct GameResultView: View {
                                 .padding(8)
                         }
                         .buttonStyle(TransparentButtonStyle())
+                        .accessibilityIdentifier("button.undo")
                         
                         Button(action: onSettings) {
                             Image(systemName: "gearshape")
@@ -188,6 +192,7 @@ struct GameResultView: View {
                                 .padding(8)
                         }
                         .buttonStyle(TransparentButtonStyle())
+                        .accessibilityIdentifier("button.settings")
                     }
                 }
             }

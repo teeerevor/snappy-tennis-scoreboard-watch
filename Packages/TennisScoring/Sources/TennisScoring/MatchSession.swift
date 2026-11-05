@@ -1,0 +1,78 @@
+//
+//  MatchSession.swift
+//  TennisScoring
+//
+
+import Foundation
+
+/// A Match as kept by its Scorer: the score, who is playing, and its place in Match History.
+/// Every change is saved straight away, so a Match that is never finished is kept as Unfinished.
+public struct MatchSession: Sendable {
+    public let id: UUID
+    public private(set) var startedAt: Date
+    public let player1: PlayerInfo
+    public let player2: PlayerInfo
+    public private(set) var score: MatchScore
+
+    private let history: MatchHistoryStore
+
+    /// - Parameter server: who serves first, or nil to not track serve.
+    public init(
+        player1: PlayerInfo,
+        player2: PlayerInfo,
+        rules: MatchRules,
+        server: Player?,
+        history: MatchHistoryStore,
+        id: UUID = UUID(),
+        now: Date = .now
+    ) {
+        self.id = id
+        self.startedAt = now
+        self.player1 = player1
+        self.player2 = player2
+        self.score = MatchScore(rules: rules, isPlayer1Serving: server != .player2, tracksServe: server != nil)
+        self.history = history
+    }
+
+    @discardableResult
+    public mutating func scorePoint(_ winner: Player, at date: Date = .now) -> ScoreEvent {
+        if score.points.isEmpty {
+            startedAt = date
+        }
+        let event = score.score(winner, at: date)
+        save(at: date)
+        return event
+    }
+
+    /// Removes the last point as if it was never played.
+    public mutating func undo(at date: Date = .now) {
+        score.undo()
+        save(at: date)
+    }
+
+    /// Continues a finished Match as a longer one. It is still the same Match.
+    public mutating func playOn(at date: Date = .now) {
+        score.playOn()
+        save(at: date)
+    }
+
+    /// A Match with no points left is not kept in Match History.
+    private func save(at date: Date) {
+        do {
+            guard !score.points.isEmpty else {
+                try history.delete(id: id)
+                return
+            }
+            try history.save(MatchRecord(
+                id: id,
+                startedAt: startedAt,
+                updatedAt: date,
+                player1: player1,
+                player2: player2,
+                score: score
+            ))
+        } catch {
+            print("Failed to save match history: \(error)")
+        }
+    }
+}

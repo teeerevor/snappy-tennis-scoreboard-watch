@@ -354,6 +354,20 @@ struct ContentView: View {
                             isPlayer1Serving: match.isPlayer1Serving, player1OnLeft: player1OnLeft)
     }
 
+    // MARK: - Live Scoreboard
+
+    /// What the Companion App's Live Scoreboard shows: nothing until the first point,
+    /// and never a Practice Session.
+    var liveMatch: LiveMatch? {
+        guard playMode == .match, !match.points.isEmpty else { return nil }
+        return LiveMatch(
+            id: matchID,
+            player1: PlayerInfo(name: player1Name, colorName: player1Color.name ?? "blue"),
+            player2: PlayerInfo(name: player2Name, colorName: player2Color.name ?? "green"),
+            score: match
+        )
+    }
+
     // MARK: - Match History
 
     // Saved after every change, so a Match that is never finished is kept as Unfinished
@@ -712,6 +726,10 @@ struct ContentView: View {
         }
         .onAppear {
             loadSettings()
+            LiveScoreboardSender.shared.send(liveMatch)
+        }
+        .onChange(of: liveMatch) { _, newValue in
+            LiveScoreboardSender.shared.send(newValue)
         }
         .onChange(of: player1Name) { _, _ in saveSettings() }
         .onChange(of: player2Name) { _, _ in saveSettings() }

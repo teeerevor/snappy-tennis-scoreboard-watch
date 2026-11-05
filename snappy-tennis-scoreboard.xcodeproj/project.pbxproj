@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		A8BB81F42FC98A25004A594F /* snappy-tennis-scoreboard-watch.app in CopyFiles */ = {isa = PBXBuildFile; fileRef = 46362E752E489FEF004C021A /* snappy-tennis-scoreboard-watch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A8CC00012FD0000000000001 /* TennisScoring in Frameworks */ = {isa = PBXBuildFile; productRef = A8CC00022FD0000000000002 /* TennisScoring */; };
+		A8CC00042FD0000000000004 /* TennisScoring in Frameworks */ = {isa = PBXBuildFile; productRef = A8CC00052FD0000000000005 /* TennisScoring */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -118,6 +119,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A8CC00042FD0000000000004 /* TennisScoring in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -237,6 +239,7 @@
 			);
 			name = "Snappy Tennis Scoreboard";
 			packageProductDependencies = (
+				A8CC00052FD0000000000005 /* TennisScoring */,
 			);
 			productName = "Snappy Tennis Scoreboard";
 			productReference = A8AFBAF72FC82E1E00A9BD2D /* Snappy Tennis Scoreboard.app */;
@@ -506,7 +509,8 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "snappy-tennis-scoreboard";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				INFOPLIST_KEY_WKWatchOnly = YES;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "app.snappysports.tennis-scoreboard";
+				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -535,7 +539,8 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "snappy-tennis-scoreboard";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				INFOPLIST_KEY_WKWatchOnly = YES;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "app.snappysports.tennis-scoreboard";
+				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -642,8 +647,9 @@
 				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = ULH45YJ22R;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = NO;
+				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Snappy-Tennis-Scoreboard-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Snappy Tennis";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -668,7 +674,7 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -681,8 +687,9 @@
 				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = ULH45YJ22R;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = NO;
+				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Snappy-Tennis-Scoreboard-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Snappy Tennis";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -707,7 +714,7 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -771,6 +778,10 @@
 
 /* Begin XCSwiftPackageProductDependency section */
 		A8CC00022FD0000000000002 /* TennisScoring */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = TennisScoring;
+		};
+		A8CC00052FD0000000000005 /* TennisScoring */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = TennisScoring;
 		};

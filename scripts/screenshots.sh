@@ -1,36 +1,56 @@
 #!/usr/bin/env bash
 #
-# Runs the UI screenshot tour on three Apple Watch sizes (one per score font size)
-# and exports the screenshots for review into build/screenshots/<device>/,
-# with a contact sheet at build/screenshots/index.html.
+# Runs the UI screenshot tour and exports the screenshots for review into
+# build/screenshots/<device>/, with a contact sheet at build/screenshots/index.html.
 #
-# Usage: scripts/screenshots.sh [device name ...]
+# By default it tours the Watch App on three Apple Watch sizes (one per score font size).
+# With --companion it tours the Companion App on an iPhone and an iPad instead,
+# into build/screenshots/companion/.
+#
+# Usage: scripts/screenshots.sh [--companion] [device name ...]
 
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
 PROJECT="snappy-tennis-scoreboard.xcodeproj"
-SCHEME="snappy-tennis-scoreboard Watch App"
-TESTS="snappy-tennis-scoreboard Watch AppUITests/ScreenshotTourTests"
-OUT="build/screenshots"
 
-if [ $# -gt 0 ]; then
-    DEVICES=("$@")
+if [ "${1:-}" = "--companion" ]; then
+    shift
+    PLATFORM="iOS"
+    SCHEME="Snappy Tennis Scoreboard"
+    TESTS="Snappy Tennis ScoreboardUITests/ScreenshotTourTests"
+    OUT="build/screenshots/companion"
+    TITLE="Companion App screenshots"
+    IMAGE_WIDTH=240
+    DEFAULT_DEVICES=("iPhone 17 Pro" "iPad Pro 11-inch (M5)")
 else
-    DEVICES=(
+    PLATFORM="watchOS"
+    SCHEME="snappy-tennis-scoreboard Watch App"
+    TESTS="snappy-tennis-scoreboard Watch AppUITests/ScreenshotTourTests"
+    OUT="build/screenshots"
+    TITLE="Watch screenshots"
+    IMAGE_WIDTH=200
+    DEFAULT_DEVICES=(
         "Apple Watch Series 9 (41mm)"
         "Apple Watch Series 11 (42mm)"
         "Apple Watch Ultra 3 (49mm)"
     )
 fi
 
-# Newest installed watchOS runtime, used when a simulator has to be created
+if [ $# -gt 0 ]; then
+    DEVICES=("$@")
+else
+    DEVICES=("${DEFAULT_DEVICES[@]}")
+fi
+
+# Newest installed runtime for the platform, used when a simulator has to be created
 RUNTIME=$(xcrun simctl list runtimes -j | python3 -c '
 import json, sys
-runtimes = [r for r in json.load(sys.stdin)["runtimes"] if r["platform"] == "watchOS" and r["isAvailable"]]
+platform = sys.argv[1]
+runtimes = [r for r in json.load(sys.stdin)["runtimes"] if r["platform"] == platform and r["isAvailable"]]
 print(sorted(runtimes, key=lambda r: [int(p) for p in r["version"].split(".")])[-1]["identifier"])
-')
+' "$PLATFORM")
 
 # Prints the id of the simulator with this name on $RUNTIME, creating it if needed
 simulator_id() {
@@ -55,7 +75,12 @@ print(next(t["identifier"] for t in json.load(sys.stdin)["devicetypes"] if t["na
     echo "$id"
 }
 
-rm -rf "$OUT"
+# Keep the other app's screenshots: the Companion App's live inside the Watch App's folder
+if [ "$PLATFORM" = "watchOS" ]; then
+    find "$OUT" -mindepth 1 -maxdepth 1 ! -name companion -exec rm -rf {} + 2>/dev/null || true
+else
+    rm -rf "$OUT"
+fi
 mkdir -p "$OUT"
 
 for device in "${DEVICES[@]}"; do
@@ -67,7 +92,7 @@ for device in "${DEVICES[@]}"; do
     xcodebuild test \
         -project "$PROJECT" \
         -scheme "$SCHEME" \
-        -destination "platform=watchOS Simulator,id=$id" \
+        -destination "platform=$PLATFORM Simulator,id=$id" \
         -only-testing:"$TESTS" \
         -parallel-testing-enabled NO \
         -resultBundlePath "$result" \
@@ -95,10 +120,13 @@ PY
 done
 
 # Contact sheet: one row per screenshot, one column per device
-python3 - "$OUT" <<'PY'
+python3 - "$OUT" "$TITLE" "$IMAGE_WIDTH" <<'PY'
 import html, os, sys
-out = sys.argv[1]
-devices = sorted(d for d in os.listdir(out) if os.path.isdir(os.path.join(out, d)) and not d.endswith(".xcresult"))
+out, title, image_width = sys.argv[1], sys.argv[2], sys.argv[3]
+devices = sorted(
+    d for d in os.listdir(out)
+    if os.path.isdir(os.path.join(out, d)) and not d.endswith(".xcresult") and d != "companion"
+)
 shots = sorted({f for d in devices for f in os.listdir(os.path.join(out, d)) if f.endswith(".png")})
 rows = []
 for shot in shots:
@@ -112,12 +140,12 @@ header = "".join(f"<th>{html.escape(d)}</th>" for d in devices)
 with open(os.path.join(out, "index.html"), "w") as f:
     f.write(f"""<!doctype html>
 <meta charset="utf-8">
-<title>Watch screenshots</title>
+<title>{html.escape(title)}</title>
 <style>
   body {{ font-family: -apple-system, sans-serif; background: #111; color: #eee; margin: 16px; }}
   table {{ border-collapse: collapse; }}
   th, td {{ padding: 8px; vertical-align: top; text-align: left; }}
-  img {{ width: 200px; border-radius: 24px; }}
+  img {{ width: {image_width}px; border-radius: 24px; }}
 </style>
 <table><tr><th></th>{header}</tr>{''.join(rows)}</table>
 """)

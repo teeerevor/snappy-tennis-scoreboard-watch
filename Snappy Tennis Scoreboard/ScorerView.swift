@@ -68,8 +68,9 @@ struct ScorerView: View {
     }
 
     private var practiceBoard: some View {
-        VStack(spacing: 12) {
+        PlayerPanels {
             practiceRow(.player1, count: scorer.practice.player1)
+        } second: {
             practiceRow(.player2, count: scorer.practice.player2)
         }
     }

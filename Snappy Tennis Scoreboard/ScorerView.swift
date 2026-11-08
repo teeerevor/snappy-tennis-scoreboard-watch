@@ -11,7 +11,8 @@ struct ScorerView: View {
     let scorer: Scorer
     let watchMatch: LiveMatch?
     let onShowWatchMatch: () -> Void
-    @State private var showingSetup = false
+    let onNewMatch: () -> Void
+    let onHome: () -> Void
 
     var body: some View {
         VStack(spacing: 16) {
@@ -31,20 +32,19 @@ struct ScorerView: View {
                     .disabled(!scorer.canUndo)
                     .accessibilityIdentifier("button.undo")
                 Spacer()
-                Button(scorer.setup.isPracticeSession ? "New Session" : "New Match", systemImage: "plus") {
-                    showingSetup = true
-                }
-                .accessibilityIdentifier("button.newMatch")
+                Button("Home", systemImage: "house", action: onHome)
+                    .labelStyle(.iconOnly)
+                    .accessibilityIdentifier("button.home")
+                Spacer()
+                Button(scorer.setup.isPracticeSession ? "New Session" : "New Match", systemImage: "plus", action: onNewMatch)
+                .accessibilityIdentifier("button.scorerNewMatch")
             }
             .font(.title3)
             .buttonStyle(.bordered)
-            .tint(.white)
+            .tint(.primary)
         }
         .padding()
         .overlay { celebrationBanner }
-        .sheet(isPresented: $showingSetup) {
-            MatchSetupView(setup: scorer.setup, onStart: scorer.start)
-        }
     }
 
     @ViewBuilder
@@ -59,7 +59,7 @@ struct ScorerView: View {
     private var matchBoard: some View {
         let match = scorer.scoreboard
         let onScore: ((Player) -> Void)? = match.winner == nil ? { scorer.scorePoint($0) } : nil
-        return ScoreboardView(match: match, onScore: onScore)
+        return ScoreboardView(match: match, player1OnLeft: scorer.setup.player1OnLeft, onScore: onScore)
             .overlay {
                 if let winner = match.winner {
                     matchResult(winner: match.player(winner).name)
@@ -68,10 +68,11 @@ struct ScorerView: View {
     }
 
     private var practiceBoard: some View {
-        PlayerPanels {
-            practiceRow(.player1, count: scorer.practice.player1)
+        let left: Player = scorer.setup.player1OnLeft ? .player1 : .player2
+        return PlayerPanels {
+            practiceRow(left, count: scorer.practice.count(for: left))
         } second: {
-            practiceRow(.player2, count: scorer.practice.player2)
+            practiceRow(left.opponent, count: scorer.practice.count(for: left.opponent))
         }
     }
 
@@ -96,7 +97,9 @@ struct ScorerView: View {
                         .buttonStyle(.borderedProminent)
                         .accessibilityIdentifier("button.playOn")
                 }
-                Button("New Match") { showingSetup = true }
+                Button("New Match", action: onNewMatch)
+                    .buttonStyle(.bordered)
+                Button("Home", action: onHome)
                     .buttonStyle(.bordered)
             }
         }

@@ -70,4 +70,87 @@ struct MatchSessionTests {
         #expect(saved.first?.isFinished == false)
         #expect(saved.first?.rules.setsToPlay == 3)
     }
+
+    // MARK: - Resuming
+
+    /// Wins games from love.
+    func win(_ player: Player, games: Int, in session: inout MatchSession) {
+        for _ in 0..<(4 * games) { session.scorePoint(player) }
+    }
+
+    @Test func resumingAMidMatchRecordPicksUpTheScoreAndServer() throws {
+        // Ana takes the first set 6-3, then it's 3-3 in the second, 30-15 to Ana
+        var session = newSession()
+        win(.player1, games: 4, in: &session)
+        win(.player2, games: 3, in: &session)
+        win(.player1, games: 2, in: &session)
+        win(.player2, games: 3, in: &session)
+        win(.player1, games: 3, in: &session)
+        session.scorePoint(.player1)
+        session.scorePoint(.player1)
+        session.scorePoint(.player2)
+        let record = try #require(try store.load().first)
+
+        let resumed = MatchSession(resuming: record, history: store)
+
+        #expect(resumed.id == session.id)
+        #expect(resumed.player1 == ana)
+        #expect(Array(resumed.score.player1SetScore.prefix(2)) == [6, 3])
+        #expect(Array(resumed.score.player2SetScore.prefix(2)) == [3, 3])
+        #expect(resumed.score.player1Points == "30")
+        #expect(resumed.score.player2Points == "15")
+        // Ana served game 9, which ended set 1; whoever served a set's last game opens the next,
+        // so Ana served games 1, 3 and 5 of set 2 and serves game 7
+        #expect(resumed.score.server == .player1)
+        #expect(resumed.score.winner == nil)
+    }
+
+    @Test func aResumedMatchKeepsSavingUnderTheSameIDAndCanUndoOldPoints() throws {
+        var session = newSession()
+        session.scorePoint(.player1)
+        session.scorePoint(.player2)
+        var resumed = MatchSession(resuming: try #require(try store.load().first), history: store)
+
+        resumed.scorePoint(.player1)
+        #expect(try store.load().count == 1)
+        #expect(try store.load().first?.points.count == 3)
+
+        resumed.undo()
+        resumed.undo()
+        #expect(resumed.score.player1Points == "15")
+        #expect(resumed.score.player2Points == "00")
+    }
+
+    @Test func resumingMidTiebreakKeepsTheTiebreakServer() throws {
+        // 6-6 in a one-set Match, Ana served first; Bob serves the tiebreak's first point
+        var session = newSession(rules: MatchRules(setsToPlay: 1))
+        for _ in 0..<6 {
+            win(.player1, games: 1, in: &session)
+            win(.player2, games: 1, in: &session)
+        }
+        #expect(session.score.isTieBreak)
+        #expect(session.score.server == .player1)
+        // After 1 point Bob serves, so after 2 points it's still Bob
+        session.scorePoint(.player1)
+        session.scorePoint(.player1)
+
+        let resumed = MatchSession(resuming: try #require(try store.load().first), history: store)
+
+        #expect(resumed.score.isTieBreak)
+        #expect(resumed.score.player1Points == "02")
+        #expect(resumed.score.server == .player2)
+        #expect(resumed.score.tieBreakServeCount == 2)
+    }
+
+    @Test func resumingWithoutServeTrackingStillScores() throws {
+        var session = newSession(server: nil)
+        win(.player2, games: 1, in: &session)
+        session.scorePoint(.player1)
+
+        let resumed = MatchSession(resuming: try #require(try store.load().first), history: store)
+
+        #expect(resumed.score.tracksServe == false)
+        #expect(resumed.score.player2SetScore[0] == 1)
+        #expect(resumed.score.player1Points == "15")
+    }
 }

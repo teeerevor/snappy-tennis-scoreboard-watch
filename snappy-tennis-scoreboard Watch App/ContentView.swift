@@ -428,6 +428,30 @@ struct ContentView: View {
         resetAllScores()
     }
 
+    /// Watch Sync: the Companion App handed over a Match, so start it here with its setup.
+    func startSyncedMatch(_ start: WatchMatchStart) {
+        player1Name = start.player1.name
+        player2Name = start.player2.name
+        player1Color = Color.fromName(start.player1.colorName) ?? .blue
+        player2Color = Color.fromName(start.player2.colorName) ?? .green
+        setsToPlay = start.rules.setsToPlay
+        tieBreakRule = start.rules.tieBreakRule
+        deuceType = start.rules.deuceType
+        serverSetting = switch start.server {
+        case .player1: .player1
+        case .player2: .player2
+        case nil: .off
+        }
+        player1OnLeft = start.player1OnLeft
+        playMode = .match
+        resetAllScores()
+        // Shared with the Companion App, so its Live Scoreboard knows this is the Match it handed over
+        matchID = start.id
+        showingSettings = false
+        showingNewMatch = false
+        showingCelebration = false
+    }
+
     func updatePracticeScore(_ player: String) {
         practiceHistory.append((player1PracticeScore, player2PracticeScore))
         if player == "player1" {
@@ -726,10 +750,13 @@ struct ContentView: View {
         }
         .onAppear {
             loadSettings()
-            LiveScoreboardSender.shared.send(liveMatch)
+            CompanionAppLink.shared.send(liveMatch)
         }
         .onChange(of: liveMatch) { _, newValue in
-            LiveScoreboardSender.shared.send(newValue)
+            CompanionAppLink.shared.send(newValue)
+        }
+        .onChange(of: CompanionAppLink.shared.receivedStart) { _, start in
+            if let start { startSyncedMatch(start) }
         }
         .onChange(of: player1Name) { _, _ in saveSettings() }
         .onChange(of: player2Name) { _, _ in saveSettings() }

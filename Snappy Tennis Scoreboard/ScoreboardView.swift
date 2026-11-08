@@ -10,13 +10,17 @@ import TennisScoring
 /// Tapping a row scores a point for that Player when `onScore` is given; otherwise it is read-only.
 struct ScoreboardView: View {
     let match: LiveMatch
+    /// Player 1 on the left in landscape, on top in portrait.
+    var player1OnLeft = true
+    /// Swaps the game score for larger set scores between games, for a scoreboard nobody taps.
+    var showsSetsBetweenGames = false
     var onScore: ((Player) -> Void)?
 
     var body: some View {
         PlayerPanels {
-            row(for: .player1)
+            row(for: player1OnLeft ? .player1 : .player2)
         } second: {
-            row(for: .player2)
+            row(for: player1OnLeft ? .player2 : .player1)
         }
     }
 
@@ -30,6 +34,7 @@ struct ScoreboardView: View {
             sets: Array(match.sets(for: player).prefix(match.rules.setsToPlay)),
             currentSet: match.currentSet,
             points: match.winner == nil ? match.points(for: player) : nil,
+            showsSetsOnly: showsSetsBetweenGames && match.isBetweenGames,
             accessibilityID: player == .player1 ? "score.player1" : "score.player2",
             onTap: onScore.map { onScore in { onScore(player) } }
         )
@@ -78,6 +83,8 @@ struct ScoreRow: View {
     var currentSet = 0
     /// Nil once the Match is over.
     var points: String?
+    /// Between games: the set scores take the game score's place, larger.
+    var showsSetsOnly = false
     var accessibilityID: String
     var onTap: (() -> Void)?
 
@@ -100,7 +107,6 @@ struct ScoreRow: View {
             .background(color, in: .rect(cornerRadius: 24))
             .contentShape(.rect(cornerRadius: 24))
             .onTapGesture { onTap?() }
-            .animation(.snappy, value: points)
         }
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier(accessibilityID)
@@ -124,23 +130,39 @@ struct ScoreRow: View {
                 .padding(.leading, pointsSize * Self.digitLeadingSpacePerFontSize)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .frame(height: height * 0.15)
-            pointsText(size: pointsSize)
-                .frame(maxHeight: .infinity)
-            setsText(size: height * 0.2)
-                .frame(height: height * 0.24)
+            if showsSetsOnly {
+                // Wider than the game score's column, which would otherwise shrink the sets to fit
+                setsText(size: height * 0.55)
+                    .frame(width: min(width, pointsSize * Self.pointsWidthPerFontSize * 1.1))
+                    .frame(maxHeight: .infinity)
+            } else {
+                pointsText(size: pointsSize)
+                    .frame(maxHeight: .infinity)
+                setsText(size: height * 0.2)
+                    .frame(height: height * 0.24)
+            }
         }
         .frame(width: pointsSize * Self.pointsWidthPerFontSize)
         .frame(maxWidth: .infinity)
     }
 
+    @ViewBuilder
     private func sideBySide(width: CGFloat, height: CGFloat) -> some View {
-        HStack(spacing: width * 0.04) {
-            VStack(alignment: .leading, spacing: 0) {
+        if showsSetsOnly {
+            HStack(spacing: width * 0.04) {
                 nameLabel(size: height * 0.3)
-                setsText(size: height * 0.5)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                setsText(size: height * 0.935)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            pointsText(size: min(height * 0.85 / Self.digitHeightPerFontSize, width * 0.55 / Self.pointsWidthPerFontSize))
+        } else {
+            HStack(spacing: width * 0.04) {
+                VStack(alignment: .leading, spacing: 0) {
+                    nameLabel(size: height * 0.3)
+                    setsText(size: height * 0.5)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                pointsText(size: min(height * 0.85 / Self.digitHeightPerFontSize, width * 0.55 / Self.pointsWidthPerFontSize))
+            }
         }
     }
 
@@ -189,7 +211,6 @@ struct ScoreRow: View {
                         .font(.system(size: size, weight: .heavy, design: .monospaced))
                         .lineLimit(1)
                         .fixedSize()
-                        .contentTransition(.numericText())
                 }
         }
     }

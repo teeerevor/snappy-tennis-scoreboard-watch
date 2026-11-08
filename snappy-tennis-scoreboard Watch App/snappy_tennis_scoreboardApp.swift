@@ -14,7 +14,7 @@ struct snappy_tennis_scoreboard_Watch_AppApp: App {
         if ProcessInfo.processInfo.arguments.contains("-uiTesting") {
             Self.resetForUITesting()
         }
-        LiveScoreboardSender.shared.activate()
+        CompanionAppLink.shared.activate()
     }
 
     var body: some Scene {

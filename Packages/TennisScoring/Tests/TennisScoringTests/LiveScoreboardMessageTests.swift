@@ -74,4 +74,30 @@ struct LiveScoreboardMessageTests {
     @Test func otherMessagesAreNotLiveScoreboardUpdates() {
         #expect(LiveScoreboardMessage(dictionary: ["something": "else"]) == nil)
     }
+
+    @Test func aScoreboardIsBetweenGamesOnlyBeforeTheFirstPointOfAGame() {
+        var score = MatchScore(rules: MatchRules(setsToPlay: 1))
+        let live = { LiveMatch(id: UUID(), player1: ana, player2: bob, score: score) }
+        #expect(live().isBetweenGames)          // 0-0, before the first point
+
+        score.score(.player1)
+        #expect(!live().isBetweenGames)         // 15-00
+
+        for _ in 0..<3 { score.score(.player1) }
+        #expect(live().isBetweenGames)          // Ana won the game, 1-0
+
+        score.score(.player2)
+        score.score(.player1)
+        #expect(!live().isBetweenGames)         // 15-15
+    }
+
+    @Test func aWonMatchIsNotBetweenGames() {
+        var score = MatchScore(rules: MatchRules(setsToPlay: 1))
+        for _ in 0..<24 { score.score(.player1) }  // 6-0
+
+        let match = LiveMatch(id: UUID(), player1: ana, player2: bob, score: score)
+
+        #expect(match.winner == .player1)
+        #expect(!match.isBetweenGames)
+    }
 }

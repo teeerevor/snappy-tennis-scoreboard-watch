@@ -64,16 +64,6 @@
 		A8DD00022FD1000000000002 /* Snappy Tennis ScoreboardUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Snappy Tennis ScoreboardUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		A8AFBB032FC8340B00A9BD2D /* Exceptions for "Snappy Tennis Scoreboard" folder in "Snappy Tennis Scoreboard" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				"Snappy-Tennis-Scoreboard-Info.plist",
-			);
-			target = A8AFBAF62FC82E1E00A9BD2D /* Snappy Tennis Scoreboard */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		46362E792E489FEF004C021A /* snappy-tennis-scoreboard Watch App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
@@ -92,9 +82,6 @@
 		};
 		A8AFBAF82FC82E1E00A9BD2D /* Snappy Tennis Scoreboard */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				A8AFBB032FC8340B00A9BD2D /* Exceptions for "Snappy Tennis Scoreboard" folder in "Snappy Tennis Scoreboard" target */,
-			);
 			path = "Snappy Tennis Scoreboard";
 			sourceTree = "<group>";
 		};

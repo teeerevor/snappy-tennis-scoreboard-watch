@@ -25,13 +25,36 @@ final class Scorer {
     private let history: MatchHistoryStore
     private let defaults: UserDefaults
 
+    /// Picks up the Match this device was scoring when the app was closed, if it is still unfinished.
     init(history: MatchHistoryStore = .standard, defaults: UserDefaults = .standard) {
         self.history = history
         self.defaults = defaults
-        let setup = MatchSetup.load(from: defaults)
-        self.setup = setup
-        self.session = Self.newSession(setup, history: history)
+        guard let current = CurrentMatch.load(from: defaults) else {
+            let setup = MatchSetup.load(from: defaults)
+            self.setup = setup
+            self.session = Self.newSession(setup, history: history)
+            return
+        }
+        self.setup = current.setup
+        let record = try? history.load().first { $0.id == current.matchID }
+        if let record, !record.isFinished, !record.points.isEmpty, !current.setup.isPracticeSession {
+            self.session = MatchSession(resuming: record, history: history)
+        } else {
+            self.session = Self.newSession(current.setup, history: history)
+        }
     }
+
+    /// How the next New Match starts: the last one started, as changed in Settings since.
+    var nextSetup: MatchSetup {
+        MatchSetup.load(from: defaults)
+    }
+
+    func saveNextSetup(_ setup: MatchSetup) {
+        setup.save(to: defaults)
+    }
+
+    /// Watch Sync started since launch; after a relaunch only a live watch Match counts as in progress.
+    private(set) var hasStartedWatchSync = false
 
     /// The Match as the scoreboard shows it.
     var scoreboard: LiveMatch {
@@ -86,8 +109,10 @@ final class Scorer {
         self.setup = setup
         setup.save(to: defaults)
         session = Self.newSession(setup, history: history)
+        CurrentMatch(setup: setup, matchID: session.id).save(to: defaults)
         practice = PracticeScore()
         celebration = nil
+        hasStartedWatchSync = setup.startsWithWatchSync
     }
 
     private static func newSession(_ setup: MatchSetup, history: MatchHistoryStore) -> MatchSession {
@@ -108,6 +133,10 @@ struct PracticeScore {
     private var previous: [(player1: Int, player2: Int)] = []
 
     var canUndo: Bool { !previous.isEmpty }
+
+    func count(for player: Player) -> Int {
+        player == .player1 ? player1 : player2
+    }
 
     mutating func score(_ player: Player) {
         previous.append((player1, player2))

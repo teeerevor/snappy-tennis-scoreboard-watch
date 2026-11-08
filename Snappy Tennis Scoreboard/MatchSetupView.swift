@@ -9,15 +9,56 @@ import TennisScoring
 /// Sets up the next Match or Practice Session on this device.
 struct MatchSetupView: View {
     @State var setup: MatchSetup
+    /// Nil on a device that can't pair with an Apple Watch, such as an iPad.
+    var watchAppInstalled: Bool?
     let onStart: (MatchSetup) -> Void
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         NavigationStack {
             Form {
+                if !setup.isPracticeSession && setup.tracksServe {
+                    Section {
+                        SwapRow(
+                            leading: setup.player(setup.firstServer),
+                            trailing: setup.player(setup.firstServer.opponent),
+                            accessibilityID: "button.swapServer"
+                        ) {
+                            setup.firstServer = setup.firstServer.opponent
+                        }
+                    } header: {
+                        SwapHeader(leading: "Server", trailing: "Receiver")
+                    }
+                }
+
+                Section {
+                    SwapRow(
+                        leading: setup.player1OnLeft ? setup.player1 : setup.player2,
+                        trailing: setup.player1OnLeft ? setup.player2 : setup.player1,
+                        accessibilityID: "button.swapSides"
+                    ) {
+                        setup.player1OnLeft.toggle()
+                    }
+                } header: {
+                    SwapHeader(leading: "Left", trailing: "Right")
+                }
+
+                if !setup.isPracticeSession, let watchAppInstalled {
+                    Section {
+                        Toggle("Sync with Apple Watch", isOn: $setup.syncsWithWatch)
+                            // Can always be turned off, even after the Watch App is removed
+                            .disabled(!watchAppInstalled && !setup.syncsWithWatch)
+                            .accessibilityIdentifier("toggle.watchSync")
+                    } footer: {
+                        Text(watchAppInstalled
+                             ? "Score on your Apple Watch. This screen shows the score."
+                             : "Install Snappy Tennis on your Apple Watch first.")
+                    }
+                }
+
                 Section("Players") {
-                    playerFields($setup.player1, placeholder: "Player 1")
-                    playerFields($setup.player2, placeholder: "Player 2")
+                    PlayerFields(player: $setup.player1, placeholder: "Player 1", accessibilityID: "menu.player1Color")
+                    PlayerFields(player: $setup.player2, placeholder: "Player 2", accessibilityID: "menu.player2Color")
                 }
 
                 Section {
@@ -40,17 +81,7 @@ struct MatchSetupView: View {
                         Picker("Deuce", selection: $setup.rules.deuceType) {
                             ForEach(DeuceType.allCases, id: \.self) { Text($0.rawValue).tag($0) }
                         }
-                    }
-
-                    Section("Serve") {
                         Toggle("Track serve", isOn: $setup.tracksServe)
-                        if setup.tracksServe {
-                            Picker("First to serve", selection: $setup.firstServer) {
-                                Text(setup.player1.name).tag(Player.player1)
-                                Text(setup.player2.name).tag(Player.player2)
-                            }
-                            .pickerStyle(.segmented)
-                        }
                     }
                 }
             }
@@ -70,20 +101,56 @@ struct MatchSetupView: View {
             }
         }
     }
+}
 
-    private func playerFields(_ player: Binding<PlayerInfo>, placeholder: String) -> some View {
+/// A Section header naming the two ends of a SwapRow, e.g. Server and Receiver.
+private struct SwapHeader: View {
+    let leading: String
+    let trailing: String
+
+    var body: some View {
         HStack {
-            TextField(placeholder, text: player.name)
-                .textInputAutocapitalization(.words)
-            Picker(placeholder, selection: player.colorName) {
-                ForEach(PlayerColor.names, id: \.self) { name in
-                    Label(name.capitalized, systemImage: "circle.fill")
-                        .tint(PlayerColor.color(named: name))
-                        .tag(name)
-                }
-            }
-            .labelsHidden()
-            .tint(PlayerColor.color(named: player.wrappedValue.colorName))
+            Text(leading)
+            Spacer()
+            Text(trailing)
         }
+    }
+}
+
+/// Two Players facing each other, as on the Watch App's New Match screen: tap to swap them,
+/// e.g. who serves first or who is shown on the left.
+private struct SwapRow: View {
+    let leading: PlayerInfo
+    let trailing: PlayerInfo
+    let accessibilityID: String
+    let onSwap: () -> Void
+    @Namespace private var names
+
+    var body: some View {
+        Button {
+            withAnimation(.smooth(duration: 0.3)) { onSwap() }
+        } label: {
+            HStack(spacing: 12) {
+                name(leading, alignment: .leading)
+                Image(systemName: "arrow.left.arrow.right")
+                    .foregroundStyle(.secondary)
+                name(trailing, alignment: .trailing)
+            }
+            .font(.body.weight(.semibold))
+            .contentShape(.rect)
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier(accessibilityID)
+        .accessibilityLabel("\(leading.name), \(trailing.name)")
+        .accessibilityHint("Swaps them")
+    }
+
+    private func name(_ player: PlayerInfo, alignment: Alignment) -> some View {
+        Text(player.name)
+            .lineLimit(1)
+            .foregroundStyle(PlayerColor.color(named: player.colorName))
+            // Each name slides across to the other end rather than jumping
+            .matchedGeometryEffect(id: player.colorName + player.name, in: names)
+            .frame(maxWidth: .infinity, alignment: alignment)
     }
 }

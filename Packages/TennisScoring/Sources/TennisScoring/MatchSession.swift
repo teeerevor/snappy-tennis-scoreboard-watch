@@ -34,6 +34,23 @@ public struct MatchSession: Sendable {
         self.history = history
     }
 
+    /// Picks up a Match kept in Match History where it stopped, for example after the app was closed.
+    /// Every point is played again with its recorded server, so undo works as if the Match never stopped.
+    public init(resuming record: MatchRecord, history: MatchHistoryStore) {
+        self.id = record.id
+        self.startedAt = record.startedAt
+        self.player1 = record.player1
+        self.player2 = record.player2
+        let firstServer = record.points.first?.server
+        var score = MatchScore(rules: record.rules, isPlayer1Serving: firstServer != .player2, tracksServe: firstServer != nil)
+        for point in record.points {
+            if let server = point.server { score.setServer(server) }
+            score.score(point.winner, at: point.at)
+        }
+        self.score = score
+        self.history = history
+    }
+
     @discardableResult
     public mutating func scorePoint(_ winner: Player, at date: Date = .now) -> ScoreEvent {
         if score.points.isEmpty {

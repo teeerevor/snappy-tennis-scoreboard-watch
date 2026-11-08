@@ -35,6 +35,12 @@ public struct LiveMatch: Codable, Equatable, Sendable {
         self.server = score.tracksServe ? score.server : nil
         self.winner = score.winner
     }
+
+    /// No point played yet in the current game: the start of a Match, game, set or tiebreak.
+    public var isBetweenGames: Bool {
+        let love = MatchScore.pointValues[0]
+        return winner == nil && player1Points == love && player2Points == love
+    }
 }
 
 /// One update from the Scorer to a Live Scoreboard, sent as a WatchConnectivity dictionary.

@@ -12,3 +12,4 @@ Exactly one device, the Scorer, keeps score for a Match, and every other device 
 
 - iOS stops Multipeer connections in the background, so the Companion App must stay open courtside, with the screen kept awake, while relaying.
 - One Scorer per Match means the relay only ever sends data one way, so there are no conflicting edits to merge.
+- Watch Sync runs the other way only to hand over a Match: the iPhone sends the Match setup to the watch, and from then on the watch is the Scorer and only score updates flow back. The single direction of score data still holds.

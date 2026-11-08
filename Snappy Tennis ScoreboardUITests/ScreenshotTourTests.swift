@@ -23,8 +23,18 @@ final class ScreenshotTourTests: XCTestCase {
 
     // MARK: - Tour
 
+    func test00Home() {
+        launch(appearance: "dark")
+        XCTAssertTrue(element("button.newMatch").waitForExistence(timeout: 3), "Home not shown")
+        snap("00-home-dark")
+        launch(appearance: "light")
+        XCTAssertTrue(element("button.newMatch").waitForExistence(timeout: 3), "Home not shown")
+        snap("00-home-light")
+    }
+
     func test01MidMatch() {
         launch()
+        startMatch()
         snap("01-new-match")
 
         // Player 1 takes the first set 6-3, then it's 3-3 in the second, 30-15
@@ -45,6 +55,7 @@ final class ScreenshotTourTests: XCTestCase {
 
     func test04MatchResult() {
         launch()
+        startMatch()
         winGames(.player1, 12)
         XCTAssertTrue(element("button.playOn").waitForExistence(timeout: 5), "Match result not shown")
         snap("04-match-result")
@@ -58,6 +69,76 @@ final class ScreenshotTourTests: XCTestCase {
         snap("05-new-match-setup")
     }
 
+    func test06WatchSync() {
+        launch(watchSync: true)
+        startMatch()
+        XCTAssertTrue(element("button.home").waitForExistence(timeout: 3), "Watch Sync not shown")
+        snap("06-watch-sync")
+
+        XCUIDevice.shared.orientation = .landscapeLeft
+        Thread.sleep(forTimeInterval: 1)  // rotation animation
+        snap("07-watch-sync-landscape")
+
+        XCUIDevice.shared.orientation = .portrait
+        element("button.home").tap()
+        XCTAssertTrue(element("button.continueMatch").waitForExistence(timeout: 3), "Continue Match not shown")
+        snap("08-watch-sync-home")
+    }
+
+    func test09PlayerColor() {
+        launch()
+        element("button.newMatch").tap()
+        let menu = element("menu.player2Color")
+        XCTAssertTrue(menu.waitForExistence(timeout: 3), "Colour menu not shown")
+        menu.tap()
+        let orange = app.buttons["Orange"]
+        XCTAssertTrue(orange.waitForExistence(timeout: 3), "Colours not listed")
+        snap("09-player-color-menu")
+
+        orange.tap()
+        Thread.sleep(forTimeInterval: 0.5)  // menu closing
+        snap("10-player-color-changed")
+    }
+
+    func test11HomeWithMatches() {
+        launch()
+        startMatch()
+        winGames(.player1, 12)
+        XCTAssertTrue(element("button.playOn").waitForExistence(timeout: 5), "Match result not shown")
+        element("button.scorerNewMatch").tap()
+        XCTAssertTrue(element("button.start").waitForExistence(timeout: 3), "New Match screen not shown")
+        element("button.start").tap()
+        winGames(.player2, 2)
+        tap(.player1)
+        element("button.home").tap()
+        XCTAssertTrue(element("button.continueMatch").waitForExistence(timeout: 3), "Continue Match not shown")
+        Thread.sleep(forTimeInterval: 0.5)  // navigation animation
+        snap("11-home-continue-match")
+
+        XCUIDevice.shared.orientation = .landscapeLeft
+        Thread.sleep(forTimeInterval: 1)  // rotation animation
+        snap("12-home-landscape")
+        XCUIDevice.shared.orientation = .portrait
+        Thread.sleep(forTimeInterval: 1)
+
+        element("button.matchHistory").tap()
+        Thread.sleep(forTimeInterval: 0.7)
+        snap("13-match-history")
+        app.navigationBars.buttons.firstMatch.tap()
+
+        element("button.shareMatch").tap()
+        Thread.sleep(forTimeInterval: 1.5)  // share sheet
+        snap("14-share-match")
+    }
+
+    func test15Settings() {
+        launch()
+        element("button.settings").tap()
+        XCTAssertTrue(element("picker.appearance").waitForExistence(timeout: 3), "Settings not shown")
+        Thread.sleep(forTimeInterval: 0.5)
+        snap("15-settings")
+    }
+
     // MARK: - Helpers
 
     private enum Side: String {
@@ -65,11 +146,22 @@ final class ScreenshotTourTests: XCTestCase {
         case player2 = "score.player2"
     }
 
-    /// Launches with the default Match setup and an empty Match History.
-    private func launch() {
+    /// Launches on Home with the default Match setup and an empty Match History.
+    private func launch(watchSync: Bool = false, appearance: String = "dark") {
         app = XCUIApplication()
-        app.launchArguments = ["-uiTesting"]
+        app.launchArguments = ["-uiTesting", "-appearance", appearance] + (watchSync ? ["-uiTestingWatchSync"] : [])
         app.launch()
+    }
+
+    /// From Home, starts a Match with the remembered setup.
+    private func startMatch() {
+        let newMatch = element("button.newMatch")
+        XCTAssertTrue(newMatch.waitForExistence(timeout: 3), "Home not shown")
+        newMatch.tap()
+        let start = element("button.start")
+        XCTAssertTrue(start.waitForExistence(timeout: 3), "New Match screen not shown")
+        start.tap()
+        Thread.sleep(forTimeInterval: 0.7)  // sheet closing, Match opening
     }
 
     private func element(_ identifier: String) -> XCUIElement {

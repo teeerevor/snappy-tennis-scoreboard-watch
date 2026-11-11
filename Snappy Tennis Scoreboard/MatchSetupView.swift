@@ -11,8 +11,11 @@ struct MatchSetupView: View {
     @State var setup: MatchSetup
     /// Nil on a device that can't pair with an Apple Watch, such as an iPad.
     var watchAppInstalled: Bool?
+    /// Asked before Start when it would replace a Match in Progress or Practice Session.
+    var confirmation: StartConfirmation?
     let onStart: (MatchSetup) -> Void
     @Environment(\.dismiss) private var dismiss
+    @State private var confirmingStart = false
 
     var body: some View {
         NavigationStack {
@@ -93,15 +96,43 @@ struct MatchSetupView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Start") {
-                        onStart(setup)
-                        dismiss()
+                        if confirmation == nil {
+                            start()
+                        } else {
+                            confirmingStart = true
+                        }
                     }
                     .accessibilityIdentifier("button.start")
                 }
             }
+            .confirmationDialog(
+                confirmation?.title ?? "",
+                isPresented: $confirmingStart,
+                titleVisibility: .visible,
+                presenting: confirmation
+            ) { confirmation in
+                Button(confirmation.action, role: .destructive, action: start)
+                    .accessibilityIdentifier("button.confirmStart")
+            } message: { confirmation in
+                Text(confirmation.message)
+            }
         }
     }
+
+    private func start() {
+        onStart(setup)
+        dismiss()
+    }
 }
+
+/// What starting a New Match would end, for Start to confirm first.
+struct StartConfirmation {
+    let title: String
+    let message: String
+    /// The confirming button's title.
+    let action: String
+}
+
 
 /// A Section header naming the two ends of a SwapRow, e.g. Server and Receiver.
 private struct SwapHeader: View {

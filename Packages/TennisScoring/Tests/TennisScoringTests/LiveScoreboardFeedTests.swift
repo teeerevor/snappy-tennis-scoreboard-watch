@@ -36,13 +36,22 @@ struct LiveScoreboardFeedTests {
         #expect(feed.match(at: now)?.player1Points == "30")
     }
 
-    @Test func aMatchFromHoursAgoIsNoLongerShown() {
+    @Test func aMatchFromAnEarlierDayIsNoLongerShown() {
         var feed = LiveScoreboardFeed()
-        let threeHoursLater = Date(timeIntervalSince1970: 20 + 3 * 60 * 60)
+        let utc = Calendar.utc
+        // Last update at 19:00, app opened at 09:00 the next morning
+        feed.receive(update(points: 2, at: 19 * 60 * 60))
 
-        feed.receive(update(points: 2, at: 20))
+        #expect(feed.match(at: Date(timeIntervalSince1970: 33 * 60 * 60), calendar: utc) == nil)
+    }
 
-        #expect(feed.match(at: threeHoursLater) == nil)
+    @Test func aRainDelayOfHoursTheSameDayKeepsTheMatchShowing() {
+        var feed = LiveScoreboardFeed()
+        let utc = Calendar.utc
+        // Last update at 13:00, play resumes at 17:30
+        feed.receive(update(points: 2, at: 13 * 60 * 60))
+
+        #expect(feed.match(at: Date(timeIntervalSince1970: 17.5 * 60 * 60), calendar: utc)?.player1Points == "30")
     }
 
     @Test func aRainDelayOfHalfAnHourKeepsTheMatchShowing() {

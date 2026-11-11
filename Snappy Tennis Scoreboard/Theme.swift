@@ -9,7 +9,6 @@ import UIKit
 /// The Night Court colours and type used on Home and the screens it opens, in light and dark mode.
 extension Color {
     static let courtBackground = Color(light: 0xE6F0F8, dark: 0x17304D)
-    static let courtLine = Color(light: 0xFFFFFF, lightAlpha: 0.9, dark: 0xFFFFFF, darkAlpha: 0.07)
     static let ballYellow = Color(light: 0xDEE76E, dark: 0xE4EB7A)
     static let onBall = Color(light: 0x1C2414, dark: 0x1C2414)
     static let ink = Color(light: 0x17304D, dark: 0xFFFFFF)

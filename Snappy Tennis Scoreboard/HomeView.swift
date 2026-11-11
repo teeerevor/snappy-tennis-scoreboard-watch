@@ -11,8 +11,8 @@ import TennisScoring
 struct HomeView: View {
     let watchConnection: WatchConnection
     let history: MatchHistory
-    /// What Continue Match goes back to, or nil when no Match is in progress.
-    let matchInProgress: String?
+    /// What Home offers to go back to, or nil when nothing is in progress.
+    let inProgress: InProgress?
     let onNewMatch: () -> Void
     let onContinueMatch: () -> Void
 
@@ -34,7 +34,7 @@ struct HomeView: View {
             }
             .scrollBounceBehavior(.basedOnSize)
         }
-        .background { CourtLines().ignoresSafeArea() }
+        .background(Color.courtBackground.ignoresSafeArea())
         .toolbar(.hidden, for: .navigationBar)
         .onAppear(perform: history.reload)
     }
@@ -47,7 +47,7 @@ struct HomeView: View {
             Spacer(minLength: 0)
             SnappyBallLogo()
                 // Smaller with Continue Match, so the tiles still fit without scrolling
-                .frame(width: min(width * (matchInProgress == nil ? 0.6 : 0.48), 300))
+                .frame(width: min(width * (inProgress == nil ? 0.6 : 0.48), 300))
                 .padding(.vertical, 8)
             Spacer(minLength: 0)
             actions(tileHeight: 230)
@@ -63,7 +63,7 @@ struct HomeView: View {
                 SnappyBallLogo()
                     .frame(width: min(height * 0.6, 340))
                     .frame(maxWidth: .infinity)
-                actions(tileHeight: max(130, height - (matchInProgress == nil ? 230 : 318)))
+                actions(tileHeight: max(130, height - (inProgress == nil ? 230 : 318)))
                     .frame(maxWidth: 520)
             }
             .frame(maxHeight: .infinity)
@@ -90,8 +90,8 @@ struct HomeView: View {
 
     private func actions(tileHeight: CGFloat) -> some View {
         VStack(spacing: 16) {
-            if let matchInProgress {
-                ContinueMatchButton(detail: matchInProgress, action: onContinueMatch)
+            if let inProgress {
+                ContinueButton(inProgress: inProgress, action: onContinueMatch)
             }
             NewMatchButton(action: onNewMatch)
             HStack(spacing: 14) {
@@ -107,6 +107,20 @@ struct HomeView: View {
     }
 }
 
+/// Something Home can go back to: this device's Match in Progress or Practice Session, or the
+/// Live Scoreboard of the Match the Apple Watch is scoring.
+struct InProgress {
+    enum Kind {
+        case match
+        case practiceSession
+        case liveScoreboard
+    }
+
+    let kind: Kind
+    /// Who is playing and the score so far.
+    let detail: String
+}
+
 /// Where Home's buttons lead.
 enum HomeDestination: Hashable {
     case match
@@ -115,29 +129,6 @@ enum HomeDestination: Hashable {
 }
 
 // MARK: - Pieces
-
-/// Faint court lines behind Home, as if looking down on the court from the umpire's chair.
-private struct CourtLines: View {
-    var body: some View {
-        Canvas { context, size in
-            let w = size.width
-            let h = size.height
-            var lines = Path()
-            for x in [0.1, 0.2, 0.8, 0.9] {
-                lines.move(to: CGPoint(x: w * x, y: 0))
-                lines.addLine(to: CGPoint(x: w * x, y: h))
-            }
-            // Service line and centre service line
-            lines.move(to: CGPoint(x: w * 0.2, y: h * 0.39))
-            lines.addLine(to: CGPoint(x: w * 0.8, y: h * 0.39))
-            lines.move(to: CGPoint(x: w * 0.5, y: h * 0.39))
-            lines.addLine(to: CGPoint(x: w * 0.5, y: h))
-            context.stroke(lines, with: .color(.courtLine), lineWidth: 3)
-        }
-        .background(Color.courtBackground)
-        .accessibilityHidden(true)
-    }
-}
 
 /// The Snappy tennis ball inside its ring. The ring follows light and dark mode; the ball is the artwork.
 struct SnappyBallLogo: View {
@@ -226,24 +217,46 @@ private struct NewMatchButton: View {
     }
 }
 
-/// Goes back to the Match in progress.
-private struct ContinueMatchButton: View {
-    let detail: String
+/// Continue Match, Continue Practice, or Back to Live Scoreboard.
+private struct ContinueButton: View {
+    let inProgress: InProgress
     let action: () -> Void
+
+    private var title: String {
+        switch inProgress.kind {
+        case .match: "CONTINUE MATCH"
+        case .practiceSession: "CONTINUE PRACTICE"
+        case .liveScoreboard: "BACK TO LIVE SCOREBOARD"
+        }
+    }
+
+    private var accessibilityID: String {
+        switch inProgress.kind {
+        case .match: "button.continueMatch"
+        case .practiceSession: "button.continuePractice"
+        case .liveScoreboard: "button.backToLiveScoreboard"
+        }
+    }
+
+    private var icon: String {
+        inProgress.kind == .liveScoreboard ? "applewatch.radiowaves.left.and.right" : "play.fill"
+    }
 
     var body: some View {
         Button(action: action) {
             HStack(spacing: 14) {
-                Image(systemName: "play.fill")
+                Image(systemName: icon)
                     .font(.system(size: 20, weight: .bold))
                     .foregroundStyle(Color.onBall)
                     .frame(width: 48, height: 48)
                     .background(Color.ballYellow, in: .circle)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("CONTINUE MATCH")
+                    Text(title)
                         .font(.snappyHeading(26))
                         .foregroundStyle(Color.ink)
-                    Text(detail)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                    Text(inProgress.detail)
                         .font(.system(size: 15, weight: .medium))
                         .foregroundStyle(Color.inkSecondary)
                         .lineLimit(1)
@@ -256,7 +269,7 @@ private struct ContinueMatchButton: View {
             .overlay { Capsule().strokeBorder(Color.tileStroke) }
         }
         .buttonStyle(TileButtonStyle())
-        .accessibilityIdentifier("button.continueMatch")
+        .accessibilityIdentifier(accessibilityID)
     }
 }
 

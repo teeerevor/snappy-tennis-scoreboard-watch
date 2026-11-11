@@ -47,12 +47,10 @@ public struct WatchMatchStart: Codable, Equatable, Sendable {
         )
     }
 
-    /// A start the watch only receives this long after it was sent (its app was not opened in time)
-    /// would replace whatever the watch has been scoring since, so it is ignored.
-    public static let maximumAge: TimeInterval = 2 * 60 * 60
-
-    public func isStale(at now: Date = .now) -> Bool {
-        now.timeIntervalSince(sentAt) > Self.maximumAge
+    /// A start the watch only receives on a later day of tennis than it was sent (its app was not
+    /// opened in time) would replace whatever the watch has been scoring since, so it is ignored.
+    public func isStale(at now: Date = .now, calendar: Calendar = .current) -> Bool {
+        !MatchDay.isSameDay(sentAt, as: now, calendar: calendar)
     }
 
     private static let key = "watchMatchStart"

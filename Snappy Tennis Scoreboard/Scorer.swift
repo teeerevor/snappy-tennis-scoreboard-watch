@@ -24,11 +24,13 @@ final class Scorer {
 
     private let history: MatchHistoryStore
     private let defaults: UserDefaults
+    private let now: () -> Date
 
-    /// Picks up the Match this device was scoring when the app was closed, if it is still unfinished.
-    init(history: MatchHistoryStore = .standard, defaults: UserDefaults = .standard) {
+    /// Picks up the Match in Progress this device was scoring when the app was closed.
+    init(history: MatchHistoryStore = .standard, defaults: UserDefaults = .standard, now: @escaping () -> Date = { .now }) {
         self.history = history
         self.defaults = defaults
+        self.now = now
         guard let current = CurrentMatch.load(from: defaults) else {
             let setup = MatchSetup.load(from: defaults)
             self.setup = setup
@@ -37,7 +39,9 @@ final class Scorer {
         }
         self.setup = current.setup
         let record = try? history.load().first { $0.id == current.matchID }
-        if let record, !record.isFinished, !record.points.isEmpty, !current.setup.isPracticeSession {
+        // Left until the day of tennis ended, it is an Unfinished Match rather than one to continue
+        if let record, !record.isFinished, let lastPoint = record.points.last, !current.setup.isPracticeSession,
+           MatchDay.isSameDay(lastPoint.at, as: now()) {
             self.session = MatchSession(resuming: record, history: history)
         } else {
             self.session = Self.newSession(current.setup, history: history)
@@ -61,10 +65,12 @@ final class Scorer {
         LiveMatch(id: session.id, player1: session.player1, player2: session.player2, score: session.score)
     }
 
-    /// Mid-Match or mid-Practice Session, so a watch Match should not take over the screen.
+    /// A Match in Progress or a Practice Session under way, so a watch Match should not take over the screen
+    /// and starting another needs confirming.
     var isScoring: Bool {
         if setup.isPracticeSession { return practice.canUndo }
-        return !session.score.points.isEmpty && session.score.winner == nil
+        guard let lastPoint = session.score.points.last, session.score.winner == nil else { return false }
+        return MatchDay.isSameDay(lastPoint.at, as: now())
     }
 
     var canUndo: Bool {

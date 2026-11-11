@@ -64,12 +64,15 @@ struct WatchMatchStartTests {
         #expect(start.placeholder.server == nil)
     }
 
-    @Test func aStartTheWatchOnlyGetsHoursLaterIsIgnored() {
-        let sent = Date(timeIntervalSince1970: 0)
+    @Test func aStartTheWatchOnlyGetsTheNextDayIsIgnored() {
+        // Sent at 18:00
+        let sent = Date(timeIntervalSince1970: 18 * 60 * 60)
         let start = WatchMatchStart(sentAt: sent, player1: ana, player2: bob, rules: MatchRules(), server: nil)
 
-        #expect(!start.isStale(at: sent.addingTimeInterval(10 * 60)))
-        #expect(start.isStale(at: sent.addingTimeInterval(3 * 60 * 60)))
+        #expect(!start.isStale(at: sent.addingTimeInterval(10 * 60), calendar: .utc))
+        #expect(!start.isStale(at: sent.addingTimeInterval(4 * 60 * 60), calendar: .utc))
+        // 08:00 the next morning
+        #expect(start.isStale(at: sent.addingTimeInterval(14 * 60 * 60), calendar: .utc))
     }
 
     @Test func aStartWithoutSidesPutsPlayer1OnTheLeft() throws {

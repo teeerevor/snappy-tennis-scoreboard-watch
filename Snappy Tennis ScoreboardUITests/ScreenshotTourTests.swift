@@ -81,7 +81,7 @@ final class ScreenshotTourTests: XCTestCase {
 
         XCUIDevice.shared.orientation = .portrait
         element("button.home").tap()
-        XCTAssertTrue(element("button.continueMatch").waitForExistence(timeout: 3), "Continue Match not shown")
+        XCTAssertTrue(element("button.backToLiveScoreboard").waitForExistence(timeout: 3), "Back to Live Scoreboard not shown")
         snap("08-watch-sync-home")
     }
 
@@ -121,6 +121,16 @@ final class ScreenshotTourTests: XCTestCase {
         XCUIDevice.shared.orientation = .portrait
         Thread.sleep(forTimeInterval: 1)
 
+        element("button.newMatch").tap()
+        XCTAssertTrue(element("button.start").waitForExistence(timeout: 3), "New Match screen not shown")
+        element("button.start").tap()
+        XCTAssertTrue(element("button.confirmStart").waitForExistence(timeout: 3), "Replace confirmation not shown")
+        snap("12b-replace-match-confirmation")
+        app.buttons["Cancel"].firstMatch.tap()
+        Thread.sleep(forTimeInterval: 0.5)
+        if element("button.start").exists { app.navigationBars.buttons["Cancel"].tap() }
+        Thread.sleep(forTimeInterval: 0.7)
+
         element("button.matchHistory").tap()
         Thread.sleep(forTimeInterval: 0.7)
         snap("13-match-history")
@@ -129,6 +139,17 @@ final class ScreenshotTourTests: XCTestCase {
         element("button.shareMatch").tap()
         Thread.sleep(forTimeInterval: 1.5)  // share sheet
         snap("14-share-match")
+    }
+
+    func test16ScorerInLightMode() {
+        launch(appearance: "light")
+        startMatch()
+        tap(.player1, times: 2)
+        snap("16-scorer-light-mode")
+        element("button.home").tap()
+        XCTAssertTrue(element("button.continueMatch").waitForExistence(timeout: 3), "Home not shown")
+        Thread.sleep(forTimeInterval: 0.7)
+        snap("17-home-light-after-scorer")
     }
 
     func test15Settings() {

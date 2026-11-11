@@ -11,6 +11,7 @@ struct ContentView: View {
     let scorer: Scorer
     let watchConnection: WatchConnection
     @State private var history = MatchHistory()
+    @AppStorage(Appearance.storageKey) private var appearance = Appearance.system
     @State private var path: [HomeDestination] = []
     @State private var showingWatchMatch = false
     @State private var showingSetup = false
@@ -24,7 +25,7 @@ struct ContentView: View {
             HomeView(
                 watchConnection: watchConnection,
                 history: history,
-                matchInProgress: matchInProgress,
+                inProgress: inProgress,
                 onNewMatch: { showingSetup = true },
                 onContinueMatch: continueMatch
             )
@@ -36,6 +37,8 @@ struct ContentView: View {
                 }
             }
         }
+        // The scoreboard is always dark; set here at the root, as only the window's scheme reaches the status bar
+        .preferredColorScheme(path.last == .match ? .dark : appearance.colorScheme)
         // A watch Match takes over the screen when it starts, unless this device is busy scoring
         .onChange(of: watchConnection.match?.id) { _, newID in
             showingWatchMatch = newID != nil && !scorer.isScoring
@@ -47,6 +50,7 @@ struct ContentView: View {
             MatchSetupView(
                 setup: scorer.nextSetup,
                 watchAppInstalled: watchConnection.isSupported ? watchConnection.isWatchAppInstalled : nil,
+                confirmation: startConfirmation,
                 onStart: start
             )
         }
@@ -71,25 +75,49 @@ struct ContentView: View {
         }
         .animation(.default, value: showingWatchMatch)
         .toolbar(.hidden, for: .navigationBar)
+        // Always dark, whatever the appearance: bright Player colours on black read best from the court
+        .background(Color.black.ignoresSafeArea())
+        .environment(\.colorScheme, .dark)
     }
 
-    /// What Continue Match on Home goes back to, or nil when nothing is in progress.
-    private var matchInProgress: String? {
+    /// What Home offers to go back to. This device's own Match in Progress comes first; the watch's
+    /// Match is still reachable from the Scorer screen's banner.
+    private var inProgress: InProgress? {
+        let setup = scorer.setup
         if scorer.isScoring {
-            let setup = scorer.setup
             if setup.isPracticeSession {
                 let count = scorer.practice
-                return "Practice Session · \(setup.player1.name) \(count.player1)–\(count.player2) \(setup.player2.name)"
+                return InProgress(kind: .practiceSession, detail: "\(setup.player1.name) \(count.player1)–\(count.player2) \(setup.player2.name)")
             }
-            return "\(setup.player1.name) v \(setup.player2.name) · \(scorer.scoreboard.setsSummary)"
+            return InProgress(kind: .match, detail: "\(setup.player1.name) v \(setup.player2.name) · \(scorer.scoreboard.setsSummary)")
         }
         if let match = watchConnection.match, match.winner == nil {
-            return "\(match.player1.name) v \(match.player2.name) · live on Apple Watch"
+            return InProgress(kind: .liveScoreboard, detail: "\(match.player1.name) v \(match.player2.name) · \(match.setsSummary) on Apple Watch")
         }
-        if scorer.hasStartedWatchSync, watchConnection.match?.winner == nil {
-            return "\(scorer.setup.player1.name) v \(scorer.setup.player2.name) · on Apple Watch"
+        // Before the watch's first update; after a relaunch only its updates count
+        if scorer.hasStartedWatchSync, watchConnection.match == nil {
+            return InProgress(kind: .liveScoreboard, detail: "\(setup.player1.name) v \(setup.player2.name) · on Apple Watch")
         }
         return nil
+    }
+
+    /// Starting a New Match ends this device's Match in Progress or Practice Session, so Start asks first.
+    private var startConfirmation: StartConfirmation? {
+        guard scorer.isScoring else { return nil }
+        let setup = scorer.setup
+        if setup.isPracticeSession {
+            return StartConfirmation(
+                title: "End this Practice Session?",
+                message: "Practice Sessions are not kept in Match History.",
+                action: "End Practice Session"
+            )
+        }
+        let names = "\(setup.player1.name) v \(setup.player2.name)"
+        return StartConfirmation(
+            title: "Replace \(names)?",
+            message: "\(names) (\(scorer.scoreboard.setsSummary)) will be kept in Match History as an Unfinished Match.",
+            action: "Start New Match"
+        )
     }
 
     /// 0–0 until the watch sends its first update, including after this app relaunches mid-Match.

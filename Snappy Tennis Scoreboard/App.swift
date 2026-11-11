@@ -13,7 +13,6 @@ struct SnappyTennisApp: App {
     @State private var scorer: Scorer
     /// Activates WatchConnectivity as the app launches.
     @State private var watchConnection = WatchConnection()
-    @AppStorage(Appearance.storageKey) private var appearance = Appearance.system
     @AppStorage(SettingsKey.keepsScreenAwake) private var keepsScreenAwake = true
 
     init() {
@@ -33,7 +32,6 @@ struct SnappyTennisApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView(scorer: scorer, watchConnection: watchConnection)
-                .preferredColorScheme(appearance.colorScheme)
                 .onChange(of: keepsScreenAwake, initial: true) { _, keepsAwake in
                     // Kept courtside, so by default the screen stays on
                     UIApplication.shared.isIdleTimerDisabled = keepsAwake

@@ -10,10 +10,6 @@ public struct LiveScoreboardFeed: Equatable, Sendable {
     private var latestMatch: LiveMatch?
     private var latestSentAt: Date?
 
-    /// Updates older than this are from a Match long over (WatchConnectivity redelivers
-    /// the last update on launch), but a long rain delay still counts as in progress.
-    public static let maximumAge: TimeInterval = 2 * 60 * 60
-
     public init() {}
 
     public mutating func receive(_ message: LiveScoreboardMessage) {
@@ -22,10 +18,11 @@ public struct LiveScoreboardFeed: Equatable, Sendable {
         latestMatch = message.match
     }
 
-    /// The Match to show at `now`: nil when the Scorer has no Match in progress, or has gone
-    /// quiet for too long (its app was closed mid-Match, so no update ever cleared it).
-    public func match(at now: Date = .now) -> LiveMatch? {
-        guard let latestSentAt, now.timeIntervalSince(latestSentAt) <= Self.maximumAge else { return nil }
+    /// The Match to show at `now`: nil when the Scorer has no Match in Progress, or its last update
+    /// was on an earlier day of tennis. WatchConnectivity redelivers the last update on launch, and a
+    /// Scorer closed mid-Match never sends one to clear it, but a long rain delay still counts as in progress.
+    public func match(at now: Date = .now, calendar: Calendar = .current) -> LiveMatch? {
+        guard let latestSentAt, MatchDay.isSameDay(latestSentAt, as: now, calendar: calendar) else { return nil }
         return latestMatch
     }
 }

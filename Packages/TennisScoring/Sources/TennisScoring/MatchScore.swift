@@ -170,13 +170,17 @@ public struct MatchScore: Codable, Equatable, Sendable {
                 }
                 event = .set
 
+                // Whoever received first in the tiebreak serves first after it.
+                // Serve has switched after point 1, 3, 5…, so undo those switches to find the first server.
+                let switchesDuringTieBreak = (tieBreakServeCount + 1) / 2
+                let isPlayer1FirstTieBreakServer = isPlayer1Serving != (switchesDuringTieBreak % 2 == 1)
+                isPlayer1Serving = !isPlayer1FirstTieBreakServer
+                tieBreakServeCount = 0
+
                 if hasWonMatch(playerSetScore, opponentSetScore) {
                     event = .match
                 } else {
                     currentSet += 1
-                    // Reset tiebreak serve count and switch serve for next set
-                    tieBreakServeCount = 0
-                    isPlayer1Serving.toggle()
                 }
             }
         } else if hasWonGame(playerPoints, opponentPoints) {

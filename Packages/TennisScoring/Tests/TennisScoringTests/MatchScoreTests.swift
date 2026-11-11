@@ -100,6 +100,23 @@ struct MatchScoreTests {
         #expect(match.tieBreakServeCount == 0)
     }
 
+    @Test(arguments: [0, 1, 2, 3, 4, 5])
+    func afterATieBreakTheFirstReceiverServesTheNextSet(loserPoints: Int) {
+        var match = MatchScore(rules: MatchRules(setsToPlay: 3, tieBreakRule: .at66))
+        match.winGames(.player1, 5)
+        match.winGames(.player2, 6)
+        match.winGame(.player1)
+        #expect(match.isTieBreak)
+        let firstReceiver = match.server.opponent
+
+        for _ in 0..<loserPoints { match.score(.player2) }
+        var event = ScoreEvent.point
+        while event == .point { event = match.score(.player1) }
+
+        #expect(event == .set)
+        #expect(match.server == firstReceiver)
+    }
+
     @Test func tieBreakAtFiveAllEndsSixFive() {
         var match = MatchScore(rules: MatchRules(setsToPlay: 1, tieBreakRule: .at55))
         match.winGames(.player1, 4)

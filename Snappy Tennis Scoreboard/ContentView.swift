@@ -46,6 +46,7 @@ struct ContentView: View {
                 path = [.match]
             }
         }
+        .onChange(of: watchConnection.matchHistoryChanges) { _, _ in history.reload() }
         .sheet(isPresented: $showingSetup, onDismiss: openMatchAfterSetup) {
             MatchSetupView(
                 setup: scorer.nextSetup,

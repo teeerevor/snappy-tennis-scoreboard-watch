@@ -8,8 +8,8 @@ import Observation
 import TennisScoring
 import WatchConnectivity
 
-/// The link to the paired Apple Watch: hands it Matches for Watch Sync, and keeps the Live Scoreboard
-/// of the Match it is scoring up to date.
+/// The link to the paired Apple Watch: hands it Matches for Watch Sync, keeps the Live Scoreboard
+/// of the Match it is scoring up to date, and keeps the Matches it scores in this device's Match History.
 @Observable
 final class WatchConnection: NSObject, WCSessionDelegate {
     private var feed = LiveScoreboardFeed()
@@ -24,6 +24,10 @@ final class WatchConnection: NSObject, WCSessionDelegate {
 
     /// Watch Sync needs the Watch App on the paired Apple Watch.
     private(set) var isWatchAppInstalled = false
+
+    /// Moves on whenever a watch Match is kept in Match History, so Home and Match History can reload.
+    private(set) var matchHistoryChanges = 0
+    @ObservationIgnored private let history: MatchHistoryStore = .standard
 
     /// False on a device that can't pair with an Apple Watch, such as an iPad.
     var isSupported: Bool { WCSession.isSupported() }
@@ -70,6 +74,16 @@ final class WatchConnection: NSObject, WCSessionDelegate {
         now = .now
     }
 
+    private func receive(_ update: MatchHistoryUpdate?) {
+        guard let update else { return }
+        do {
+            try history.apply(update)
+            matchHistoryChanges += 1
+        } catch {
+            print("Failed to keep watch Match in Match History: \(error)")
+        }
+    }
+
     private func activated(watchAppInstalled: Bool) {
         isWatchAppInstalled = watchAppInstalled
         guard let start = pendingStart else { return }
@@ -102,6 +116,20 @@ final class WatchConnection: NSObject, WCSessionDelegate {
     nonisolated func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
         let message = LiveScoreboardMessage(dictionary: message)
         Task { @MainActor in self.receive(message) }
+    }
+
+    /// A watch Match for Match History, sent straight away while this app is open.
+    /// The reply tells the watch it no longer needs sending.
+    nonisolated func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
+        let update = MatchHistoryUpdate(dictionary: message)
+        DispatchQueue.main.sync { self.receive(update) }
+        replyHandler([:])
+    }
+
+    /// A watch Match for Match History, queued on the watch until this app could take it.
+    nonisolated func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any]) {
+        let update = MatchHistoryUpdate(dictionary: userInfo)
+        Task { @MainActor in self.receive(update) }
     }
 
     nonisolated func sessionDidBecomeInactive(_ session: WCSession) {}

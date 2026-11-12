@@ -38,11 +38,9 @@ final class Scorer {
             return
         }
         self.setup = current.setup
-        let record = try? history.load().first { $0.id == current.matchID }
-        // Left until the day of tennis ended, it is an Unfinished Match rather than one to continue
-        if let record, !record.isFinished, let lastPoint = record.points.last, !current.setup.isPracticeSession,
-           MatchDay.isSameDay(lastPoint.at, as: now()) {
-            self.session = MatchSession(resuming: record, history: history)
+        if !current.setup.isPracticeSession,
+           let continued = MatchSession(continuing: current.matchID, history: history, now: now()) {
+            self.session = continued
         } else {
             self.session = Self.newSession(current.setup, history: history)
         }

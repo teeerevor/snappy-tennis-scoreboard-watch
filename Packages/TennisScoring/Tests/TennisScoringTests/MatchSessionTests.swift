@@ -153,4 +153,56 @@ struct MatchSessionTests {
         #expect(resumed.score.player2SetScore[0] == 1)
         #expect(resumed.score.player1Points == "15")
     }
+
+    // MARK: - Continue Match
+
+    /// 8 November 2026 at the given UTC time.
+    func nov8(_ hour: Int, _ minute: Int = 0, dayOffset: Int = 0) -> Date {
+        Calendar.utc.date(from: DateComponents(year: 2026, month: 11, day: 8 + dayOffset, hour: hour, minute: minute))!
+    }
+
+    /// Ana wins the first game, then it's 15-30 with Bob serving; the last point is at 23:00.
+    func matchLeftAt11pm() -> MatchSession {
+        var session = newSession()
+        for _ in 0..<4 { session.scorePoint(.player1, at: nov8(22, 50)) }
+        session.scorePoint(.player1, at: nov8(22, 55))
+        session.scorePoint(.player2, at: nov8(22, 58))
+        session.scorePoint(.player2, at: nov8(23, 0))
+        return session
+    }
+
+    @Test func continuesTheMatchInProgressLaterThatEvening() throws {
+        let left = matchLeftAt11pm()
+
+        let continued = try #require(MatchSession(continuing: left.id, history: store, now: nov8(23, 10), calendar: .utc))
+
+        #expect(continued.id == left.id)
+        #expect(continued.player1 == ana)
+        #expect(continued.score.player1SetScore[0] == 1)
+        #expect(continued.score.player1Points == "15")
+        #expect(continued.score.player2Points == "30")
+        #expect(continued.score.server == .player2)
+        #expect(continued.score.canUndo)
+    }
+
+    @Test func continuesAfterMidnightUntilTheDayOfTennisEndsAt2am() {
+        let left = matchLeftAt11pm()
+
+        #expect(MatchSession(continuing: left.id, history: store, now: nov8(1, 30, dayOffset: 1), calendar: .utc) != nil)
+        #expect(MatchSession(continuing: left.id, history: store, now: nov8(2, 0, dayOffset: 1), calendar: .utc) == nil)
+    }
+
+    @Test func aWonMatchIsNotContinued() {
+        var session = newSession(rules: MatchRules(setsToPlay: 1))
+        win(.player1, games: 6, in: &session)
+        #expect(session.score.winner == .player1)
+
+        #expect(MatchSession(continuing: session.id, history: store) == nil)
+    }
+
+    @Test func aNewMatchWithNoPointsIsNotContinued() {
+        let session = newSession()
+
+        #expect(MatchSession(continuing: session.id, history: store) == nil)
+    }
 }

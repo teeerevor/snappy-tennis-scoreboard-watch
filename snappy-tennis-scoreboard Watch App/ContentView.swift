@@ -338,6 +338,53 @@ struct ContentView: View {
         UserDefaults.standard.set(player1OnLeft, forKey: "player1OnLeft")
     }
 
+    // MARK: - Match in Progress Persistence
+    // watchOS closes the app while it is in the background (often after wrist-down mid-match),
+    // so the Match in Progress and Practice Session count are picked up again on relaunch
+
+    func saveMatchInProgressID() {
+        UserDefaults.standard.set(matchID.uuidString, forKey: "matchInProgressID")
+    }
+
+    /// Continue Match: picks up the Match in Progress from Match History, with its own Players and rules.
+    func continueMatchInProgress() {
+        guard let idString = UserDefaults.standard.string(forKey: "matchInProgressID"),
+              let id = UUID(uuidString: idString),
+              let session = MatchSession(continuing: id, history: historyStore)
+        else { return }
+
+        player1Name = session.player1.name
+        player2Name = session.player2.name
+        player1Color = Color.fromName(session.player1.colorName) ?? .blue
+        player2Color = Color.fromName(session.player2.colorName) ?? .green
+        // Settings follow the Match, so syncRules() keeps its rules and server
+        setsToPlay = session.score.rules.setsToPlay
+        tieBreakRule = session.score.rules.tieBreakRule
+        deuceType = session.score.rules.deuceType
+        serverSetting = session.score.tracksServe ? (session.score.isPlayer1Serving ? .player1 : .player2) : .off
+
+        match = session.score
+        shown = match
+        matchID = session.id
+        matchStartedAt = session.startedAt
+        isMatchComplete = false
+    }
+
+    func savePracticeScore() {
+        UserDefaults.standard.set(player1PracticeScore, forKey: "practiceScore1")
+        UserDefaults.standard.set(player2PracticeScore, forKey: "practiceScore2")
+        UserDefaults.standard.set(Date.now, forKey: "practiceUpdatedAt")
+    }
+
+    /// A Practice Session count stays until the day of tennis ends, like a Match in Progress.
+    func loadPracticeScore() {
+        guard let updatedAt = UserDefaults.standard.object(forKey: "practiceUpdatedAt") as? Date,
+              MatchDay.isSameDay(updatedAt, as: .now)
+        else { return }
+        player1PracticeScore = UserDefaults.standard.integer(forKey: "practiceScore1")
+        player2PracticeScore = UserDefaults.standard.integer(forKey: "practiceScore2")
+    }
+
     // Rules changed in settings apply to the Match in progress
     func syncRules() {
         match.rules = MatchRules(setsToPlay: setsToPlay, tieBreakRule: tieBreakRule, deuceType: deuceType)
@@ -373,18 +420,26 @@ struct ContentView: View {
     // Saved after every change, so a Match that is never finished is kept as Unfinished
     func recordMatch() {
         do {
+            let update: MatchHistoryUpdate
             if match.points.isEmpty {
                 try historyStore.delete(id: matchID)
+                update = .deleted(id: matchID)
             } else {
-                try historyStore.save(MatchRecord(
+                let record = MatchRecord(
                     id: matchID,
                     startedAt: matchStartedAt,
                     updatedAt: .now,
                     player1: PlayerInfo(name: player1Name, colorName: player1Color.name ?? "blue"),
                     player2: PlayerInfo(name: player2Name, colorName: player2Color.name ?? "green"),
                     score: match
-                ))
+                )
+                try historyStore.save(record)
+                update = .saved(record)
             }
+            // The Companion App keeps watch Matches too, so they can be found and shared there
+            CompanionAppLink.shared.sendToMatchHistory(update)
+            // The first Match after launch never went through resetAllScores()
+            saveMatchInProgressID()
         } catch {
             print("Failed to save match history: \(error)")
         }
@@ -420,6 +475,8 @@ struct ContentView: View {
         player1PracticeScore = 0
         player2PracticeScore = 0
         practiceHistory.removeAll()
+        saveMatchInProgressID()
+        savePracticeScore()
     }
 
     func startNewMatch(server: ServerSetting, player1OnLeft: Bool) {
@@ -447,6 +504,7 @@ struct ContentView: View {
         resetAllScores()
         // Shared with the Companion App, so its Live Scoreboard knows this is the Match it handed over
         matchID = start.id
+        saveMatchInProgressID()
         showingSettings = false
         showingNewMatch = false
         showingCelebration = false
@@ -459,6 +517,7 @@ struct ContentView: View {
         } else {
             player2PracticeScore = player2PracticeScore >= 99 ? 0 : player2PracticeScore + 1
         }
+        savePracticeScore()
     }
 
     func undoPracticeChange() {
@@ -466,6 +525,7 @@ struct ContentView: View {
         let prev = practiceHistory.removeLast()
         player1PracticeScore = prev.0
         player2PracticeScore = prev.1
+        savePracticeScore()
     }
 
     var player1PracticeDisplay: String {
@@ -750,6 +810,8 @@ struct ContentView: View {
         }
         .onAppear {
             loadSettings()
+            loadPracticeScore()
+            continueMatchInProgress()
             CompanionAppLink.shared.send(liveMatch)
         }
         .onChange(of: liveMatch) { _, newValue in

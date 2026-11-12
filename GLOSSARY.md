@@ -35,7 +35,7 @@ A Match that stopped being in progress before anyone won it: replaced by a New M
 _Avoid_: Abandoned, incomplete, cancelled
 
 **Practice Session**:
-Casual play scored without match rules mattering. It is never kept in Match History.
+Casual play scored without match rules mattering. It is never kept in Match History. On the Apple Watch its count stays when the app closes, until the day of tennis ends at 2am.
 _Avoid_: Training, training mode
 
 **Scorer**:
@@ -51,7 +51,7 @@ The Companion App hands a Match it set up to the Apple Watch, which starts it an
 _Avoid_: Send to watch, mirroring
 
 **Match History**:
-The record of every point of every Match scored on a device, finished or Unfinished. Each device keeps its own.
+The record of every point of every Match scored on a device, finished or Unfinished. Each device keeps its own, and the Apple Watch also sends its Matches to the paired iPhone's, so they can be found and shared there.
 _Avoid_: Results, log
 
 **Scorecard**:

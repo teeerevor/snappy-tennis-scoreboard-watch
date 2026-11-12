@@ -51,6 +51,17 @@ public struct MatchSession: Sendable {
         self.history = history
     }
 
+    /// Continue Match: the Match in Progress with this id, or nil if it was won, never had a point,
+    /// or the day of tennis of its last point has ended (it is then an Unfinished Match).
+    public init?(continuing id: UUID, history: MatchHistoryStore, now: Date = .now, calendar: Calendar = .current) {
+        guard let record = try? history.load().first(where: { $0.id == id }),
+              !record.isFinished,
+              let lastPoint = record.points.last,
+              MatchDay.isSameDay(lastPoint.at, as: now, calendar: calendar)
+        else { return nil }
+        self.init(resuming: record, history: history)
+    }
+
     @discardableResult
     public mutating func scorePoint(_ winner: Player, at date: Date = .now) -> ScoreEvent {
         if score.points.isEmpty {

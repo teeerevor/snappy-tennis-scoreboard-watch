@@ -24,7 +24,7 @@ struct MatchHistoryView: View {
                 ContentUnavailableView(
                     "No Matches Yet",
                     systemImage: "sportscourt",
-                    description: Text("Matches scored here are kept in Match History. Practice Sessions are not.")
+                    description: Text("Matches scored here or on Apple Watch are kept in Match History. Practice Sessions are not.")
                 )
             }
         }

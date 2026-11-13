@@ -126,6 +126,8 @@ enum HomeDestination: Hashable {
     case match
     case matchHistory
     case settings
+    /// Share Match for one Match in Match History.
+    case shareMatch(id: UUID)
 }
 
 // MARK: - Pieces
@@ -186,30 +188,37 @@ private struct WatchStatusPill: View {
     }
 }
 
-/// The big yellow NEW MATCH button.
+/// The big lime NEW MATCH button.
 private struct NewMatchButton: View {
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            HStack {
+            HStack(spacing: 0) {
                 Text("NEW MATCH")
-                    .font(.snappyHeading(44))
-                    .foregroundStyle(Color.onBall)
+                    .font(.snappyHeading(41.8))
+                    .foregroundStyle(.black.opacity(0.7))
                     .lineLimit(1)
                     .minimumScaleFactor(0.6)
-                    .padding(.leading, 28)
-                Spacer()
-                Image(systemName: "arrow.right")
-                    .font(.system(size: 26, weight: .semibold))
-                    .foregroundStyle(Color.ballYellow)
+                    // Centred in the space left of the arrow
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal, 16)
+                Circle()
+                    .fill(.black)
+                    .overlay {
+                        // Cut out of the circle, so the button's lime shows through the arrow
+                        Image(systemName: "arrow.right")
+                            .font(.system(size: 26, weight: .semibold))
+                            .blendMode(.destinationOut)
+                    }
+                    .compositingGroup()
+                    .opacity(0.7)
                     .frame(width: 64, height: 64)
-                    .background(Color.onBall, in: .circle)
                     .padding(.trailing, 12)
             }
             .frame(height: 88)
-            .background(Color.ballYellow, in: .capsule)
-            .shadow(color: Color.ballYellow.opacity(0.35), radius: 18)
+            .background(Color.snappyLime, in: .capsule)
+            .shadow(color: Color.snappyLime.opacity(0.5), radius: 18)
         }
         .buttonStyle(TileButtonStyle())
         .accessibilityLabel("New Match")
@@ -344,12 +353,7 @@ private struct MatchHistoryTile: View {
                 .foregroundStyle(Color.ink)
                 .lineLimit(1)
             Spacer(minLength: 0)
-            if let winner = record.winner {
-                Image(systemName: "trophy.fill")
-                    .font(.system(size: 12))
-                    .foregroundStyle(PlayerColor.color(named: record.player(winner).colorName))
-                    .accessibilityLabel("\(record.player(winner).name) won")
-            } else {
+            if !record.isFinished {
                 Text("–")
                     .font(.system(size: 15, weight: .bold))
                     .foregroundStyle(Color.inkSecondary)
@@ -362,14 +366,14 @@ private struct MatchHistoryTile: View {
     }
 }
 
-/// The latest Match's Scorecard, opening the share sheet.
+/// The latest Match's Scorecard, opening Share Match.
 private struct ShareMatchTile: View {
     let latest: MatchRecord?
     let height: CGFloat
 
     var body: some View {
         if let latest {
-            ShareScorecardLink(record: latest) {
+            NavigationLink(value: HomeDestination.shareMatch(id: latest.id)) {
                 tile(subtitle: "Scorecard ready") {
                     ScorecardView(record: latest, isCompact: true)
                         .rotationEffect(.degrees(-4))

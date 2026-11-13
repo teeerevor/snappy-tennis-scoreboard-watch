@@ -134,11 +134,25 @@ final class ScreenshotTourTests: XCTestCase {
         element("button.matchHistory").tap()
         Thread.sleep(forTimeInterval: 0.7)
         snap("13-match-history")
+        app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'button.shareMatch.'")).firstMatch.tap()
+        XCTAssertTrue(element("button.share").waitForExistence(timeout: 3), "Share Match not shown from Match History")
         app.navigationBars.buttons.firstMatch.tap()
+        Thread.sleep(forTimeInterval: 0.7)
+        app.navigationBars.buttons.firstMatch.tap()
+        Thread.sleep(forTimeInterval: 0.7)
 
         element("button.shareMatch").tap()
-        Thread.sleep(forTimeInterval: 1.5)  // share sheet
+        XCTAssertTrue(element("button.share").waitForExistence(timeout: 3), "Share Match not shown from Home")
+        Thread.sleep(forTimeInterval: 0.5)
         snap("14-share-match")
+        let name = element("field.player1Name")
+        name.tap()
+        name.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 3) + "Roger\n")
+        Thread.sleep(forTimeInterval: 0.5)
+        snap("14b-share-match-renamed")
+        element("button.share").tap()
+        Thread.sleep(forTimeInterval: 1.5)  // share sheet
+        snap("14c-share-sheet")
     }
 
     func test16ScorerInLightMode() {

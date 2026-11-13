@@ -55,7 +55,7 @@ The record of every point of every Match scored on a device, finished or Unfinis
 _Avoid_: Results, log
 
 **Scorecard**:
-A Match's result drawn as a card (Players, set scores, finished or Unfinished) for sharing as an image.
+A Match's result drawn as a card (Players, set scores, finished or Unfinished) for sharing as an image. It is shared from the Share Match screen, where the Players' names can be changed for that share without changing Match History.
 _Avoid_: Receipt, summary
 
 **Continue Match**:

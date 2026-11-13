@@ -9,11 +9,13 @@ import TennisScoring
 /// Match History: every Match kept on this device, finished or Unfinished, newest first.
 struct MatchHistoryView: View {
     let history: MatchHistory
+    /// Opens Share Match for a Match.
+    let onShare: (MatchRecord) -> Void
 
     var body: some View {
         List {
             ForEach(history.records) { record in
-                MatchHistoryRow(record: record)
+                MatchHistoryRow(record: record) { onShare(record) }
             }
             .onDelete { offsets in
                 offsets.map { history.records[$0] }.forEach(history.delete)
@@ -36,6 +38,7 @@ struct MatchHistoryView: View {
 /// One Match in Match History: both Players with their set scores, when it was played, and a Scorecard to share.
 private struct MatchHistoryRow: View {
     let record: MatchRecord
+    let onShare: () -> Void
 
     var body: some View {
         HStack(spacing: 12) {
@@ -54,11 +57,12 @@ private struct MatchHistoryRow: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
             }
-            ShareScorecardLink(record: record) {
+            Button(action: onShare) {
                 Image(systemName: "square.and.arrow.up")
-                    .accessibilityLabel("Share Scorecard")
+                    .accessibilityLabel("Share Match")
             }
             .buttonStyle(.borderless)
+            .accessibilityIdentifier("button.shareMatch.\(record.id)")
         }
         .padding(.vertical, 4)
     }

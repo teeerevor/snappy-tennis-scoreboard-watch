@@ -19,6 +19,8 @@ extension Color {
     static let ringStart = Color(light: 0x9CCBEA, dark: 0x22618C)
     static let ringEnd = Color(light: 0xD8EBF7, dark: 0x5E8AA7)
     static let watchReady = Color(light: 0x5DAA2A, dark: 0xA6D96A)
+    /// The primary buttons and the Scorecard's header.
+    static let snappyLime = Color(light: 0xE0F097, dark: 0xE0F097)
 
     init(light: UInt32, lightAlpha: CGFloat = 1, dark: UInt32, darkAlpha: CGFloat = 1) {
         self.init(uiColor: UIColor { traits in

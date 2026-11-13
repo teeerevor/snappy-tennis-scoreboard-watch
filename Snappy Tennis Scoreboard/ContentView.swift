@@ -32,8 +32,15 @@ struct ContentView: View {
             .navigationDestination(for: HomeDestination.self) { destination in
                 switch destination {
                 case .match: matchScreen
-                case .matchHistory: MatchHistoryView(history: history)
+                case .matchHistory:
+                    MatchHistoryView(history: history) { record in
+                        path.append(.shareMatch(id: record.id))
+                    }
                 case .settings: SettingsView(scorer: scorer)
+                case .shareMatch(let id):
+                    if let record = history.records.first(where: { $0.id == id }) {
+                        ShareMatchView(record: record)
+                    }
                 }
             }
         }

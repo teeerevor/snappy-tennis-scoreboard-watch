@@ -52,7 +52,7 @@ struct ShareMatchView: View {
                         Text("SHARE")
                             .font(.snappyHeading(30))
                     }
-                    .foregroundStyle(.black.opacity(0.7))
+                    .foregroundStyle(.black.opacity(0.8))
                     .frame(maxWidth: .infinity)
                     .frame(height: 64)
                     .background(Color.snappyLime, in: .capsule)

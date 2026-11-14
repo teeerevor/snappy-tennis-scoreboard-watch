@@ -197,7 +197,7 @@ private struct NewMatchButton: View {
             HStack(spacing: 0) {
                 Text("NEW MATCH")
                     .font(.snappyHeading(41.8))
-                    .foregroundStyle(.black.opacity(0.7))
+                    .foregroundStyle(.black.opacity(0.8))
                     .lineLimit(1)
                     .minimumScaleFactor(0.6)
                     // Centred in the space left of the arrow
@@ -212,7 +212,7 @@ private struct NewMatchButton: View {
                             .blendMode(.destinationOut)
                     }
                     .compositingGroup()
-                    .opacity(0.7)
+                    .opacity(0.8)
                     .frame(width: 64, height: 64)
                     .padding(.trailing, 12)
             }

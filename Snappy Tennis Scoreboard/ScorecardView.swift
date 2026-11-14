@@ -99,7 +99,7 @@ private struct SnappyLogo: View {
             .transformEffect(CGAffineTransform(a: 1, b: 0, c: -0.22, d: 1, tx: size * 0.15, ty: 0))
             // Faded as one, so SPORTS isn't darker where it overlaps Snappy
             .compositingGroup()
-            .opacity(0.7)
+            .opacity(0.8)
             .accessibilityLabel("Snappy Sports")
     }
 }
